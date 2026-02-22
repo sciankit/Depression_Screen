@@ -13,6 +13,7 @@ export default function ChatPage() {
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
+    const [isMicActive, setIsMicActive] = useState(false);
     const [speechError, setSpeechError] = useState('');
     const messagesEndRef = useRef(null);
     const conversationRef = useRef(null);
@@ -91,8 +92,18 @@ export default function ChatPage() {
                     console.error("Error:", error);
                     setSpeechError(typeof error === 'string' ? error : error.message || 'Connection error.');
                     setIsConnected(false);
+                    setIsMicActive(false);
                 },
             });
+
+            // Do not listen by default! Wait for user to explicitly activate it.
+            await conversation.setVolume({ volume: 1 });
+            try {
+                conversation.setMicMuted(true);
+            } catch (e) {
+                // Ignore if mute fails initially
+            }
+            setIsMicActive(false);
 
             conversationRef.current = conversation;
             setIsConnected(true);
@@ -102,6 +113,7 @@ export default function ChatPage() {
             console.error("Failed to start Aura:", error);
             setSpeechError("Microphone access is required to connect, or there was a network error.");
             setIsConnected(false);
+            setIsMicActive(false);
         }
     };
 
@@ -111,6 +123,23 @@ export default function ChatPage() {
             conversationRef.current = null;
         }
     }, []);
+
+    const toggleMicrophone = async () => {
+        if (!isConnected || !conversationRef.current) return;
+
+        try {
+            if (isMicActive) {
+                conversationRef.current.setMicMuted(true);
+                setIsMicActive(false);
+            } else {
+                conversationRef.current.setMicMuted(false);
+                setIsMicActive(true);
+            }
+        } catch (e) {
+            setSpeechError("Microphone control failed.");
+            setIsMicActive(false);
+        }
+    };
 
     const handleSend = async (e) => {
         e.preventDefault();
@@ -178,12 +207,30 @@ export default function ChatPage() {
 
                 <button
                     type="button"
+                    onClick={toggleMicrophone}
+                    className="chip"
+                    disabled={!isConnected}
+                    style={{
+                        height: 46,
+                        borderRadius: 999,
+                        padding: '0 14px',
+                        fontWeight: 700,
+                        background: isMicActive ? '#FF2D2D22' : 'transparent',
+                        color: isMicActive ? '#FF2D2D' : 'inherit',
+                        opacity: isConnected ? 1 : 0.5
+                    }}
+                >
+                    {isMicActive ? <Square size={12} fill="currentColor" /> : <Mic size={15} />}
+                    {isMicActive ? 'Stop' : 'Speak'}
+                </button>
+
+                <button
+                    type="button"
                     onClick={toggleConnection}
                     className="chip"
                     style={{ height: 46, borderRadius: 999, padding: '0 14px', fontWeight: 700, background: isConnected ? '#FF2D2D22' : 'transparent', color: isConnected ? '#FF2D2D' : 'inherit' }}
                 >
-                    {isConnected ? <Square size={12} fill="currentColor" /> : <Mic size={15} />}
-                    {isConnected ? 'Disconnect' : 'Connect'}
+                    {isConnected ? 'Disconnect' : 'Connect Agent'}
                 </button>
 
                 <button type="submit" className="btn-primary" style={{ width: 46, height: 46, borderRadius: '50%', padding: 0 }}>
