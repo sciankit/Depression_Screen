@@ -30,63 +30,40 @@ MindTrace uses these streams as **early-warning markers**, not diagnosis.
 - Explainability panel showing top contributing digital biomarkers
 - BioHealth Collector with simulated telemetry, communication logs, and JSON export
 - Databricks integration hooks for NLP + PHQ serving endpoints
-- Prize Demo Command Center (`/demo-hq`) with interactive full-journey simulation
+- Personal Care Plan page (`/plan`) with adaptive check-in and guided actions
 
-## New Flagship Capability: Prize Demo Command Center
-The new `Demo HQ` experience is designed to make the app extremely useful and immediately demoable for judges, partners, and institutional pilots.
+## New Flagship Capability: Personal Care Plan
+The new `Personal Care Plan` experience is built for daily users first.
 
 ### What it does
-1. Runs a complete storyline from user screening to intervention to care-team action.
-2. Simulates multiple realistic personas (student, frontline worker, community health volunteer).
-3. Displays live risk trend + resilience trend with policy-driven tier transitions.
-4. Executes an adaptive branching screening flow instead of a static questionnaire.
-5. Generates personalized intervention plans tied to the highest-load domains.
-6. Activates escalation pathways and crisis links when high-risk conditions are reached.
-7. Shows an operations-grade care queue for counselor assignment and follow-up.
-8. Surfaces outcome KPIs that align with competition judging and pilot reporting.
-9. Includes governance toggles for consent, data sharing, and analytics controls.
+1. Shows a weekly risk and resilience trend for the current user context.
+2. Runs adaptive branching check-ins instead of static long forms.
+3. Generates a personalized action plan based on dominant burden categories.
+4. Applies safety logic that can elevate support intensity when needed.
+5. Surfaces crisis resources immediately for high-risk or safety-positive states.
+6. Includes user-facing consent controls for trusted-contact and care-team sharing.
 
 ### Why this is useful
 1. Converts screening from a one-time score into an ongoing decision system.
-2. Demonstrates practical value for both individual users and care teams.
+2. Gives users clear next steps, not only a label.
 3. Proves "time-to-support" and "action adherence" outcomes, not vanity metrics.
-4. Makes safety operations explicit and inspectable.
-5. Creates a reusable demo narrative under real-world constraints (low bandwidth, constrained staff, mixed cohorts).
+4. Makes safety operations explicit and understandable for users.
+5. Keeps the experience short, actionable, and repeatable each day.
 
 ### Why this is needed
 1. Most screening apps stop at a score and do not support immediate next actions.
-2. Institutions need workflows, not only analytics.
-3. Judges need clear evidence of impact and responsible AI practices.
+2. Users need guided routines that adjust with changing stress patterns.
+3. Safety escalation should be built into normal use, not hidden.
 4. Real deployments require consent and escalation guardrails to be first-class product elements.
 
 ## Adaptive Screening Engine Details
-The new adaptive engine lives in `src/demo/adaptiveEngine.js` and introduces:
+The adaptive engine lives in `src/screening/adaptiveEngine.js` and introduces:
 - Dynamic question branching based on previous answers and severity
 - Safety-overrides that elevate risk tier when safety signals are present
 - Category-level scoring (`sleep`, `mood`, `stress`, `social`, `function`, `safety`)
 - Auto-generated plans by dominant burden category and overall risk tier
 
 This enables shorter forms while preserving decision quality.
-
-## Demo Story Mode Details
-`src/demo/demoScenarios.js` defines:
-- Persona-specific trend trajectories
-- Milestones and measurable impact statements
-- Care queue records with escalation state
-- Competition-ready KPI blocks
-
-This keeps demos consistent, reproducible, and narrative-driven.
-
-## End-to-End Demo Script (Recommended)
-1. Open `/demo-hq` and select a persona.
-2. Move the timeline slider to show risk trend deterioration and recovery.
-3. Complete adaptive screening with high-risk branch options.
-4. Show auto-generated intervention plan.
-5. Trigger safety state to reveal immediate support resources.
-6. Walk through care-team queue and status transitions.
-7. Close with KPI cards and current milestone impact.
-
-Expected runtime: 5-7 minutes with full product story coverage.
 
 ## Award Track Mapping
 ### Best AI for Human Safety by SafetyKit

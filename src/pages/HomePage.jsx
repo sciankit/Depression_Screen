@@ -141,8 +141,8 @@ export default function HomePage() {
                         <button className="chip" onClick={() => navigate('/chat')}>
                             <Sparkles size={13} /> Start check-in chat
                         </button>
-                        <button className="chip" onClick={() => navigate('/demo-hq')}>
-                            <Sparkles size={13} /> Launch demo command center
+                        <button className="chip" onClick={() => navigate('/plan')}>
+                            <Sparkles size={13} /> Open your personal plan
                         </button>
                     </div>
                 </div>

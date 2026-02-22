@@ -7,7 +7,7 @@ import CollectorPage from './pages/CollectorPage';
 import SafetyPage from './pages/SafetyPage';
 import ImpactPage from './pages/ImpactPage';
 import VizLabPage from './pages/VizLabPage';
-import DemoHQPage from './pages/DemoHQPage';
+import PlanPage from './pages/PlanPage';
 import { GlobalStateProvider } from './GlobalStateProvider';
 
 function App() {
@@ -23,7 +23,7 @@ function App() {
             <Route path="safety" element={<SafetyPage />} />
             <Route path="impact" element={<ImpactPage />} />
             <Route path="viz-lab" element={<VizLabPage />} />
-            <Route path="demo-hq" element={<DemoHQPage />} />
+            <Route path="plan" element={<PlanPage />} />
           </Route>
         </Routes>
       </Router>

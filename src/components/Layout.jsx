@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { Home, MessageCircle, ShieldCheck, Sparkles, Trophy } from 'lucide-react';
+import { Home, MessageCircle, ShieldCheck, Sparkles, ClipboardList } from 'lucide-react';
 
 export default function Layout() {
     const navItems = [
@@ -7,7 +7,7 @@ export default function Layout() {
         { name: 'Talk', path: '/chat', icon: MessageCircle },
         { name: 'Care', path: '/safety', icon: ShieldCheck },
         { name: 'Story', path: '/stats', icon: Sparkles },
-        { name: 'Demo HQ', path: '/demo-hq', icon: Trophy },
+        { name: 'Plan', path: '/plan', icon: ClipboardList },
     ];
 
     return (
