@@ -1,15 +1,9 @@
-import { useState, useRef } from "react";
 import {
   LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from "recharts";
 
-// ── CONFIG ──────────────────────────────────────────────────────────────────
-const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
-const ELEVENLABS_VOICE_ID = import.meta.env.VITE_ELEVENLABS_VOICE_ID;
-
-// ── MOCK DATA ────────────────────────────────────────────────────────────────
 const sleepData = [
   { day: "Mon", hours: 7.2 }, { day: "Tue", hours: 6.5 },
   { day: "Wed", hours: 5.8 }, { day: "Thu", hours: 6.1 },
@@ -38,17 +32,6 @@ const phqData = [
   { day: "Sun", score: 3 },
 ];
 
-const INSIGHT_TEXT =
-  "Here's your weekly wellbeing summary. Your sleep averaged 6.9 hours, " +
-  "with a noticeable dip mid-week on Wednesday to just 5.8 hours. " +
-  "Your estimated PHQ-9 depression severity score also peaked on Wednesday at 8 (mild depression), " +
-  "aligning with the drop in your heart rate variability to 49 and step count to 4,300. " +
-  "The good news is that all signals, including your mood, " +
-  "recovered strongly by Saturday and Sunday. " +
-  "Consider protecting your Wednesday schedule — that day consistently shows " +
-  "the most strain across your behavioral signals.";
-
-// ── CUSTOM TOOLTIP ────────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label, unit }) => {
   if (active && payload && payload.length) {
     return (
@@ -59,7 +42,7 @@ const CustomTooltip = ({ active, payload, label, unit }) => {
         padding: "8px 14px",
         fontSize: 12,
         color: "var(--color-ink)",
-        boxShadow: "var(--card-shadow)"
+        boxShadow: "var(--card-shadow)",
       }}>
         <div style={{ fontWeight: 600, marginBottom: 2 }}>{label}</div>
         <div style={{ color: "var(--color-muted)" }}>{payload[0].value}{unit}</div>
@@ -69,7 +52,6 @@ const CustomTooltip = ({ active, payload, label, unit }) => {
   return null;
 };
 
-// ── CHART CARD ────────────────────────────────────────────────────────────────
 const ChartCard = ({ title, subtitle, children }) => (
   <div style={{
     background: "var(--surface-strong)",
@@ -87,94 +69,19 @@ const ChartCard = ({ title, subtitle, children }) => (
   </div>
 );
 
-// ── MAIN APP ──────────────────────────────────────────────────────────────────
 export default function MindTrace() {
-  const [status, setStatus] = useState("idle"); // idle | loading | playing | error
-  const audioRef = useRef(null);
-
-  const speakInsight = async () => {
-    if (status === "loading" || status === "playing") return;
-    setStatus("loading");
-
-    try {
-      const res = await fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`,
-        {
-          method: "POST",
-          headers: {
-            "xi-api-key": ELEVENLABS_API_KEY,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            text: INSIGHT_TEXT,
-            model_id: "eleven_turbo_v2",
-            voice_settings: { stability: 0.75, similarity_boost: 0.85, style: 0.2 },
-          }),
-        }
-      );
-
-      if (!res.ok) throw new Error("ElevenLabs API error");
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-
-      if (audioRef.current) {
-        audioRef.current.pause();
-        URL.revokeObjectURL(audioRef.current.src);
-      }
-
-      const audio = new Audio(url);
-      audioRef.current = audio;
-      setStatus("playing");
-      audio.play();
-      audio.onended = () => setStatus("idle");
-    } catch (e) {
-      console.error(e);
-      setStatus("error");
-      setTimeout(() => setStatus("idle"), 3000);
-    }
-  };
-
-  const stopAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-    setStatus("idle");
-  };
-
-  const btnLabel = {
-    idle: "▶  Hear Weekly Summary",
-    loading: "Generating audio…",
-    playing: "■  Stop",
-    error: "Something went wrong",
-  }[status];
-
-  const btnColor = status === "error" ? "var(--color-danger)" : status === "playing" ? "var(--color-ink)" : "var(--color-primary)";
-
   return (
-    <div style={{
-      padding: "24px 24px 40px",
-      maxWidth: "600px",
+    <section style={{
+      padding: "24px 0 16px",
+      maxWidth: "860px",
       margin: "0 auto",
     }}>
-
-      {/* Styles */}
       <style>{`
         .recharts-cartesian-axis-tick-value { font-size: 11px; fill: var(--color-muted); }
         .recharts-cartesian-grid line { stroke: var(--color-border); }
-        @keyframes pulse-ring {
-          0% { transform: scale(0.95); opacity: 0.6; }
-          70% { transform: scale(1.08); opacity: 0; }
-          100% { transform: scale(0.95); opacity: 0; }
-        }
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
       `}</style>
 
-      {/* Header */}
-      <div style={{ maxWidth: 900, margin: "0 auto 40px" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto 24px" }}>
         <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "var(--color-muted)", textTransform: "uppercase", marginBottom: 8 }}>
           Weekly Report · Feb 15 – 21, 2026
         </div>
@@ -183,14 +90,13 @@ export default function MindTrace() {
         </h1>
         <p style={{ marginTop: 8, fontSize: 14, color: "var(--color-muted)", lineHeight: 1.6, maxWidth: 520 }}>
           Passive signals from your wearable and phone, summarized for the week.
-          Mid-week showed strain — the weekend brought recovery.
+          Mid-week showed strain, then weekend recovery.
         </p>
       </div>
 
-      {/* Charts */}
       <div style={{
         maxWidth: 900,
-        margin: "0 auto 40px",
+        margin: "0 auto",
         display: "flex",
         gap: 16,
         flexWrap: "wrap",
@@ -202,14 +108,12 @@ export default function MindTrace() {
               <XAxis dataKey="day" axisLine={false} tickLine={false} />
               <YAxis domain={[0, 10]} axisLine={false} tickLine={false} width={24} />
               <Tooltip content={<CustomTooltip unit="h" />} />
-              <Bar dataKey="hours" fill="var(--chart-sleep)" radius={[4, 4, 0, 0]}
-                label={false}
-              />
+              <Bar dataKey="hours" fill="var(--chart-sleep)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="Heart Rate Variability" subtitle="ms — higher is better">
+        <ChartCard title="Heart Rate Variability" subtitle="ms - higher is better">
           <ResponsiveContainer width="100%" height={140}>
             <LineChart data={heartRateData}>
               <CartesianGrid vertical={false} />
@@ -217,8 +121,10 @@ export default function MindTrace() {
               <YAxis domain={[40, 70]} axisLine={false} tickLine={false} width={28} />
               <Tooltip content={<CustomTooltip unit="ms" />} />
               <Line
-                type="monotone" dataKey="hrv"
-                stroke="var(--chart-hrv)" strokeWidth={2.5}
+                type="monotone"
+                dataKey="hrv"
+                stroke="var(--chart-hrv)"
+                strokeWidth={2.5}
                 dot={{ fill: "var(--chart-hrv)", r: 4, strokeWidth: 0 }}
                 activeDot={{ r: 6, fill: "var(--chart-hrv-strong)" }}
               />
@@ -238,7 +144,7 @@ export default function MindTrace() {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="Depression Score (Estimated)" subtitle="PHQ-9 — lower is better">
+        <ChartCard title="Depression Score (Estimated)" subtitle="PHQ-9 - lower is better">
           <ResponsiveContainer width="100%" height={140}>
             <LineChart data={phqData}>
               <CartesianGrid vertical={false} />
@@ -246,8 +152,10 @@ export default function MindTrace() {
               <YAxis domain={[0, 27]} axisLine={false} tickLine={false} width={24} />
               <Tooltip content={<CustomTooltip unit=" pts" />} />
               <Line
-                type="monotone" dataKey="score"
-                stroke="var(--chart-phq)" strokeWidth={2.5}
+                type="monotone"
+                dataKey="score"
+                stroke="var(--chart-phq)"
+                strokeWidth={2.5}
                 dot={{ fill: "var(--chart-phq)", r: 4, strokeWidth: 0 }}
                 activeDot={{ r: 6, fill: "var(--chart-phq-strong)" }}
               />
@@ -255,78 +163,6 @@ export default function MindTrace() {
           </ResponsiveContainer>
         </ChartCard>
       </div>
-
-      {/* Insight text */}
-      <div style={{
-        maxWidth: 900,
-        margin: "0 auto 40px",
-        background: "var(--surface-strong)",
-        border: "1px solid var(--color-border)",
-        borderRadius: 16,
-        padding: "24px 28px",
-      }}>
-        <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-muted)", marginBottom: 10 }}>
-          Weekly Insight
-        </div>
-        <p className="display" style={{ fontSize: 16, color: "var(--color-ink)", lineHeight: 1.8, margin: 0, fontWeight: 400 }}>
-          {INSIGHT_TEXT}
-        </p>
-      </div>
-
-      {/* ElevenLabs Voice Button */}
-      <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", alignItems: "center", gap: 20 }}>
-        <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-          {status === "playing" && (
-            <span style={{
-              position: "absolute",
-              width: "100%", height: "100%",
-              borderRadius: 50,
-              background: "var(--color-primary)",
-              animation: "pulse-ring 1.8s ease-out infinite",
-              pointerEvents: "none",
-            }} />
-          )}
-          <button
-            onClick={status === "playing" ? stopAudio : speakInsight}
-            disabled={status === "loading"}
-            style={{
-              position: "relative",
-              background: btnColor,
-              color: "var(--color-on-primary)",
-              border: "none",
-              borderRadius: 50,
-              padding: "14px 28px",
-              fontSize: 13,
-              fontWeight: 500,
-              letterSpacing: "0.03em",
-              cursor: status === "loading" ? "default" : "pointer",
-              transition: "background 0.2s, transform 0.15s",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {status === "loading" && (
-              <span style={{
-                width: 12, height: 12,
-                border: "2px solid rgba(255,255,255,0.35)",
-                borderTopColor: "var(--color-on-primary)",
-                borderRadius: "50%",
-                display: "inline-block",
-                animation: "spin 0.7s linear infinite",
-              }} />
-            )}
-            {btnLabel}
-          </button>
-        </div>
-
-        <div style={{ fontSize: 12, color: "var(--color-muted)", lineHeight: 1.5 }}>
-          Powered by <span style={{ color: "var(--color-ink)", fontWeight: 500 }}>ElevenLabs</span>
-          <br />Calm, natural voice summary
-        </div>
-      </div>
-
-    </div>
+    </section>
   );
 }
