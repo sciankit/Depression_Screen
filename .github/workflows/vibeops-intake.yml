@@ -1,0 +1,36 @@
+name: VibeOps Intake
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+
+jobs:
+  vibeops-intake:
+    if: contains(github.event.issue.title, '[VibeOps]') || contains(join(github.event.issue.labels.*.name, ','), 'vibeops')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post intake checklist
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const body = [
+              "VibeOps intake acknowledged.",
+              "",
+              "Execution checklist:",
+              "- Confirm goal and constraints are specific",
+              "- Confirm acceptance criteria are measurable",
+              "- Confirm branch naming and PR linking requirements",
+              "- Confirm build/test expectations",
+              "",
+              "Once confirmed, VibeOps can proceed with implementation."
+            ].join("\n");
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body
+            });
