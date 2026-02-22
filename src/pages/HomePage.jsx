@@ -1,110 +1,61 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Loader, MessageCircle, Mic, PlayCircle, Square, Waves } from 'lucide-react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useRef, useState } from 'react';
+import {
+    Loader,
+    MessageCircle,
+    PhoneCall,
+    PlayCircle,
+    Square,
+    ShieldAlert,
+    Target,
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useGlobalState } from '../GlobalStateProvider';
+import { RISK_TIERS } from '../riskUtils';
 
 const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICE_ID = import.meta.env.VITE_ELEVENLABS_VOICE_ID;
 
-const GUIDED_MEDITATION_TEXT = [
-    'Take a slow breath in through your nose.',
-    'Hold for a moment, then release gently.',
-    'Relax your shoulders and soften your jaw.',
-    'Notice one thing in your body that feels safe right now.',
-    'Stay here for a few breaths. You are doing enough.',
-].join(' ');
+const TODAY_TASKS = [
+    {
+        title: '2-minute emotional check-in',
+        detail: 'Name your current mood and get an adjusted response.',
+        route: '/chat',
+        icon: MessageCircle,
+    },
+    {
+        title: 'Adaptive plan refresh',
+        detail: 'Run a short branching check-in for today\'s plan.',
+        route: '/plan',
+        icon: Target,
+    },
+    {
+        title: 'Care circle quick review',
+        detail: 'Verify support contacts and escalation settings.',
+        route: '/safety',
+        icon: ShieldAlert,
+    },
+];
 
 export default function HomePage() {
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const [soothingState, setSoothingState] = useState('idle'); // idle | ambient | loading-guided | guided
-    const [soothingError, setSoothingError] = useState('');
-    const ambientCtxRef = useRef(null);
-    const ambientNodesRef = useRef([]);
-    const guidedAudioRef = useRef(null);
-    const autoStartedRef = useRef(false);
+    const { prediction, phqPrediction, isScoring, interventionPlan, ensembleDecision } = useGlobalState();
+    const [status, setStatus] = useState('idle');
+    const audioRef = useRef(null);
 
-    const stopSoothing = useCallback(() => {
-        if (guidedAudioRef.current) {
-            guidedAudioRef.current.pause();
-            URL.revokeObjectURL(guidedAudioRef.current.src);
-            guidedAudioRef.current = null;
+    const riskTier = interventionPlan?.tier ?? ensembleDecision?.tier ?? prediction?.risk_tier ?? 0;
+    const riskMeta = RISK_TIERS[riskTier] || RISK_TIERS[0];
+
+    const playPrompt = async () => {
+        if (status === 'loading' || status === 'playing') return;
+        setStatus('loading');
+
+        let promptText = "Hey, I'm here with you. We can do a quick check-in or just breathe together for a minute.";
+        if (prediction || phqPrediction) {
+            const insights = [];
+            if (prediction?.risk_tier > 0) insights.push(prediction.predicted_class);
+            if (phqPrediction?.severity && phqPrediction.severity !== 'None') insights.push(`${phqPrediction.severity} mood strain`);
+            if (insights.length) promptText = `Quick note from your patterns: ${insights.join(' and ')}. I'm here to help you reset softly.`;
         }
-
-        ambientNodesRef.current.forEach((node) => {
-            try {
-                node.stop?.();
-            } catch {
-                // no-op
-            }
-            try {
-                node.disconnect?.();
-            } catch {
-                // no-op
-            }
-        });
-        ambientNodesRef.current = [];
-
-        if (ambientCtxRef.current) {
-            ambientCtxRef.current.close();
-            ambientCtxRef.current = null;
-        }
-
-        setSoothingState('idle');
-    }, []);
-
-    const startAmbientOnly = useCallback(async () => {
-        stopSoothing();
-        setSoothingError('');
-
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) {
-            setSoothingError('Soothing audio is not supported in this browser.');
-            return;
-        }
-
-        const ctx = new AudioCtx();
-        ambientCtxRef.current = ctx;
-
-        const master = ctx.createGain();
-        master.gain.value = 0.03;
-        master.connect(ctx.destination);
-
-        const lowPad = ctx.createOscillator();
-        lowPad.type = 'sine';
-        lowPad.frequency.value = 174;
-
-        const highPad = ctx.createOscillator();
-        highPad.type = 'triangle';
-        highPad.frequency.value = 261.63;
-
-        const lowGain = ctx.createGain();
-        const highGain = ctx.createGain();
-        lowGain.gain.value = 0.6;
-        highGain.gain.value = 0.22;
-
-        const lfo = ctx.createOscillator();
-        const lfoGain = ctx.createGain();
-        lfo.type = 'sine';
-        lfo.frequency.value = 0.09;
-        lfoGain.gain.value = 0.06;
-
-        lfo.connect(lfoGain);
-        lfoGain.connect(lowGain.gain);
-
-        lowPad.connect(lowGain).connect(master);
-        highPad.connect(highGain).connect(master);
-
-        lowPad.start();
-        highPad.start();
-        lfo.start();
-
-        ambientNodesRef.current = [lowPad, highPad, lfo, lowGain, highGain, lfoGain, master];
-        setSoothingState('ambient');
-    }, [stopSoothing]);
-
-    const startGuidedMeditation = useCallback(async () => {
-        setSoothingState('loading-guided');
-        await startAmbientOnly();
 
         try {
             const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`, {
@@ -114,91 +65,124 @@ export default function HomePage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    text: GUIDED_MEDITATION_TEXT,
+                    text: promptText,
                     model_id: 'eleven_turbo_v2',
-                    voice_settings: { stability: 0.78, similarity_boost: 0.8, style: 0.15 },
+                    voice_settings: { stability: 0.75, similarity_boost: 0.85, style: 0.2 },
                 }),
             });
-            if (!res.ok) throw new Error('Failed to generate guided meditation audio.');
+            if (!res.ok) throw new Error('ElevenLabs API error');
 
             const blob = await res.blob();
             const url = URL.createObjectURL(blob);
+            if (audioRef.current) {
+                audioRef.current.pause();
+                URL.revokeObjectURL(audioRef.current.src);
+            }
+
             const audio = new Audio(url);
-            guidedAudioRef.current = audio;
+            audioRef.current = audio;
+            setStatus('playing');
             audio.play();
-            setSoothingState('guided');
-            audio.onended = () => {
-                setSoothingState('ambient');
-                URL.revokeObjectURL(url);
-                guidedAudioRef.current = null;
-            };
+            audio.onended = () => setStatus('idle');
         } catch (error) {
             console.error(error);
-            setSoothingError('Unable to start guided meditation right now.');
-            setSoothingState('ambient');
+            setStatus('error');
+            setTimeout(() => setStatus('idle'), 3000);
         }
-    }, [startAmbientOnly]);
+    };
 
-    useEffect(() => () => {
-        stopSoothing();
-    }, [stopSoothing]);
+    const stopPrompt = () => {
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+        }
+        setStatus('idle');
+    };
 
-    useEffect(() => {
-        const mode = searchParams.get('soothing');
-        if (autoStartedRef.current || !mode) return;
-        autoStartedRef.current = true;
-        if (mode === 'guided') {
-            startGuidedMeditation();
-            return;
-        }
-        if (mode === 'ambient') {
-            startAmbientOnly();
-        }
-    }, [searchParams, startAmbientOnly, startGuidedMeditation]);
+    const listenLabel = isScoring
+        ? 'Analyzing...'
+        : status === 'idle'
+            ? 'Listen First'
+            : status === 'loading'
+                ? 'Generating...'
+                : status === 'playing'
+                    ? 'Stop'
+                    : 'Try again';
 
     return (
         <div className="screen-wrap animate-fade-in" style={{ maxWidth: '860px' }}>
             <section className="card home-daily-card" style={{ marginBottom: '12px' }}>
-                <h1 className="display home-daily-title">Start Here</h1>
-                <p className="home-daily-subtitle">
-                    Choose how you want to begin: soothing audio with optional guided meditation, or a chat by text/voice.
-                </p>
+                <div className="chip home-daily-chip">
+                    <span style={{ width: 8, height: 8, borderRadius: 99, background: riskMeta.color }} />
+                    {riskMeta.label} support
+                </div>
+                <h1 className="display home-daily-title">Daily Check-in</h1>
+                <p className="home-daily-subtitle">Take 2 minutes to talk with your mindful companion about your day.</p>
 
                 <div className="home-daily-actions">
-                    <button className="home-daily-btn" onClick={startAmbientOnly}>
-                        <Waves size={14} /> Soothing music only
+                    <button className="home-daily-btn" onClick={() => navigate('/chat')}>
+                        <MessageCircle size={14} /> Text Chat
                     </button>
-                    <button className="home-daily-btn home-daily-btn-solid" onClick={startGuidedMeditation}>
-                        {soothingState === 'loading-guided' ? <Loader size={14} className="animate-spin" /> : <PlayCircle size={14} />}
-                        Soothing + guided meditation
+                    <button className="home-daily-btn" onClick={() => navigate('/chat')}>
+                        <PhoneCall size={14} /> Voice Call
                     </button>
-                    {(soothingState === 'ambient' || soothingState === 'guided' || soothingState === 'loading-guided') && (
-                        <button className="home-daily-btn" onClick={stopSoothing}>
-                            <Square size={12} fill="currentColor" /> Stop audio
-                        </button>
-                    )}
+                    <button className="home-daily-btn home-daily-btn-solid" onClick={status === 'playing' ? stopPrompt : playPrompt} disabled={isScoring}>
+                        {isScoring && <Loader size={14} className="animate-spin" />}
+                        {!isScoring && status === 'idle' && <PlayCircle size={14} />}
+                        {!isScoring && status === 'loading' && <Loader size={14} className="animate-spin" />}
+                        {!isScoring && status === 'playing' && <Square size={12} fill="currentColor" />}
+                        {listenLabel}
+                    </button>
                 </div>
+            </section>
 
-                <div style={{ marginTop: '10px' }}>
-                    <div className="chip">
-                        {soothingState === 'guided' ? 'Guided meditation playing' : soothingState === 'ambient' ? 'Soothing audio playing' : 'Audio idle'}
+            <section className="home-quick-grid" style={{ marginBottom: '12px' }}>
+                <button
+                    className="card home-quick-card home-quick-card-talk"
+                    onClick={() => navigate('/chat')}
+                    style={{ textAlign: 'left', cursor: 'pointer' }}
+                >
+                    <div className="chip" style={{ width: 'fit-content', marginBottom: '8px', color: 'var(--color-accent)' }}>
+                        Talk
                     </div>
-                </div>
-                {soothingError && <p className="text-muted" style={{ marginBottom: 0 }}>{soothingError}</p>}
+                    <h3 style={{ fontSize: '21px', marginBottom: '6px' }}>2-minute mood check</h3>
+                    <p className="text-muted" style={{ margin: 0, fontSize: '14px' }}>
+                        Vent, reflect, reset. Your assistant adapts to how your day feels.
+                    </p>
+                </button>
+
+                <button
+                    className="card home-quick-card home-quick-card-story"
+                    onClick={() => navigate('/stats')}
+                    style={{ textAlign: 'left', cursor: 'pointer' }}
+                >
+                    <div className="chip" style={{ width: 'fit-content', marginBottom: '8px' }}>
+                        Story
+                    </div>
+                    <h3 style={{ fontSize: '21px', marginBottom: '6px' }}>Your weekly vibe arc</h3>
+                    <p className="text-muted" style={{ margin: 0, fontSize: '14px' }}>
+                        See your patterns as a personal story, not a clinical dashboard.
+                    </p>
+                </button>
             </section>
 
             <section className="card">
-                <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>Chat with MindTrace</h3>
+                <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>Your next best actions</h3>
                 <p className="text-muted" style={{ marginTop: 0, marginBottom: '10px', fontSize: '14px' }}>
-                    You can continue by text or speak naturally and see your words as chat messages.
+                    Ordered by impact on your current support profile.
                 </p>
-                <div className="home-daily-actions">
-                    <button className="home-daily-btn" onClick={() => navigate('/chat')}>
-                        <MessageCircle size={14} /> Open text chat
-                    </button>
-                    <button className="home-daily-btn" onClick={() => navigate('/chat')}>
-                        <Mic size={14} /> Open voice chat
-                    </button>
+
+                <div style={{ display: 'grid', gap: '8px' }}>
+                    {TODAY_TASKS.map((task, idx) => (
+                        <button key={task.title} onClick={() => navigate(task.route)} className="home-task-btn">
+                            <div className="home-task-index">{idx + 1}</div>
+                            <div style={{ textAlign: 'left' }}>
+                                <div style={{ fontWeight: 700, fontSize: '14px' }}>{task.title}</div>
+                                <div className="text-muted" style={{ fontSize: '13px' }}>{task.detail}</div>
+                            </div>
+                            <task.icon size={16} />
+                        </button>
+                    ))}
                 </div>
             </section>
         </div>
