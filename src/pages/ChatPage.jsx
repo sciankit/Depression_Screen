@@ -2,12 +2,14 @@ import { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGlobalState } from '../GlobalStateProvider';
+import { calculateStreak, getNudgeForRiskTier, loadEngagementState, recordCheckIn } from '../growth/engagementEngine';
 
 export default function ChatPage() {
-    const { scoreModel, interventionPlan, ensembleDecision } = useGlobalState();
+    const { scoreModel, interventionPlan, ensembleDecision, prediction } = useGlobalState();
     const [messages, setMessages] = useState([
         { id: 1, text: "Hi there. I'm here if you want to reflect on your day or just take a breather. How are you feeling right now?", sender: 'bot' }
     ]);
+    const [engagementState, setEngagementState] = useState(() => loadEngagementState());
     const [input, setInput] = useState('');
     const messagesEndRef = useRef(null);
 
@@ -27,10 +29,10 @@ export default function ChatPage() {
         const updatedMessages = [...messages, newMsg];
         setMessages(updatedMessages);
         setInput('');
+        setEngagementState(recordCheckIn());
 
-        const tier = interventionPlan?.tier ?? ensembleDecision?.tier ?? 0;
+        const tier = interventionPlan?.tier ?? ensembleDecision?.tier ?? prediction?.risk_tier ?? 0;
 
-        // 1. Mock bot response (acting as the conversational agent)
         setTimeout(() => {
             let reply = "I hear you. Taking a moment to acknowledge that is a great first step.";
             if (input.toLowerCase().includes('stressed') || input.toLowerCase().includes('tired')) {
@@ -42,24 +44,19 @@ export default function ChatPage() {
             } else if (tier === 1) {
                 reply = "I notice elevated stress trends. A short walk, hydration, and one trusted check-in could help stabilize your day.";
             }
-            setMessages(prev => [...prev, { id: Date.now() + 1, text: reply, sender: 'bot' }]);
+            setMessages((prev) => [...prev, { id: Date.now() + 1, text: reply, sender: 'bot' }]);
         }, 1200);
 
-        // 2. Background Model Scoring (acting as the Health Tracker)
         try {
-            // Get last 20 messages
-            const last20 = updatedMessages.slice(-20).map(m => m.text).join(" ");
+            const last20 = updatedMessages.slice(-20).map((m) => m.text).join(" ");
             const databricksResponse = await scoreModel([last20]);
 
             if (databricksResponse && databricksResponse.predictions && databricksResponse.predictions.length > 0) {
-                const prediction = databricksResponse.predictions[0];
-                console.log("Databricks Model output:", prediction);
-
-                // Add an invisible / background insight to the log if risk tier is detected
-                if (prediction.risk_tier > 0) {
-                    setMessages(prev => [...prev, {
+                const nlpPrediction = databricksResponse.predictions[0];
+                if (nlpPrediction.risk_tier > 0) {
+                    setMessages((prev) => [...prev, {
                         id: Date.now() + 2,
-                        text: `[Internal Tracker]: Model predicted ${prediction.predicted_class} with confidence ${(prediction.confidence * 100).toFixed(1)}%`,
+                        text: `[Internal Tracker]: Model predicted ${nlpPrediction.predicted_class} with confidence ${(nlpPrediction.confidence * 100).toFixed(1)}%`,
                         sender: 'system'
                     }]);
                 }
@@ -69,20 +66,30 @@ export default function ChatPage() {
         }
     };
 
-
+    const tier = interventionPlan?.tier ?? ensembleDecision?.tier ?? prediction?.risk_tier ?? 0;
+    const streak = calculateStreak(engagementState.checkInDays);
 
     return (
         <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)', maxWidth: '600px', margin: '0 auto' }}>
-
-            {/* Header */}
             <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Sparkles size={20} color="var(--color-primary)" />
                 <h2 style={{ fontSize: '18px', margin: 0, fontWeight: 600 }}>Mindful Companion</h2>
             </div>
 
-            {/* Messages Area */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {(interventionPlan?.tier ?? ensembleDecision?.tier ?? 0) >= 1 && (
+                <div style={{
+                    border: '1px solid var(--color-border)',
+                    borderRadius: '12px',
+                    background: '#fff',
+                    padding: '10px 12px',
+                    fontSize: '13px',
+                    lineHeight: 1.4,
+                    color: 'var(--color-text-muted)'
+                }}>
+                    Streak: <strong style={{ color: 'var(--color-text-main)' }}>{streak} days</strong> · {getNudgeForRiskTier(tier, streak)}
+                </div>
+
+                {tier >= 1 && (
                     <div style={{
                         border: '1px solid #f1d8c2',
                         background: '#fff8f2',
@@ -97,7 +104,8 @@ export default function ChatPage() {
                         </Link>
                     </div>
                 )}
-                {messages.map(msg => (
+
+                {messages.map((msg) => (
                     <div key={msg.id} style={{
                         alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
                         maxWidth: '85%',
@@ -125,7 +133,6 @@ export default function ChatPage() {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Area */}
             <div style={{ padding: '16px 24px 24px', background: 'var(--color-bg)' }}>
                 <form onSubmit={handleSend} style={{ display: 'flex', gap: '10px' }}>
                     <input
@@ -157,15 +164,14 @@ export default function ChatPage() {
                         cursor: 'pointer',
                         transition: 'transform 0.2s',
                     }}
-                        onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
-                        onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-                        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                        onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.95)'; }}
+                        onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
                     >
                         <Send size={20} />
                     </button>
                 </form>
             </div>
-
         </div>
     );
 }

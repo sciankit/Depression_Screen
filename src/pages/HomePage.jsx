@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
-import { PlayCircle, Square, Loader, Moon, Heart, ShieldAlert } from 'lucide-react';
+import { useState, useRef, useMemo } from 'react';
+import { PlayCircle, Square, Loader, Moon, Heart, ShieldAlert, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useGlobalState } from '../GlobalStateProvider';
 import { RISK_TIERS } from '../riskUtils';
+import { calculateStreak, getNudgeForRiskTier, loadEngagementState } from '../growth/engagementEngine';
 
 const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICE_ID = import.meta.env.VITE_ELEVENLABS_VOICE_ID;
@@ -13,16 +14,21 @@ export default function HomePage() {
     const [status, setStatus] = useState("idle");
     const audioRef = useRef(null);
 
+    const engagement = useMemo(() => loadEngagementState(), []);
+    const streak = calculateStreak(engagement.checkInDays);
+    const growthRiskTier = interventionPlan?.tier ?? ensembleDecision?.tier ?? prediction?.risk_tier ?? 0;
+    const growthNudge = getNudgeForRiskTier(growthRiskTier, streak);
+    const riskMeta = RISK_TIERS[growthRiskTier] || RISK_TIERS[0];
+
     const playPrompt = async (e) => {
-        e.stopPropagation(); // prevent card click
+        e.stopPropagation();
         if (status === "loading" || status === "playing") return;
         setStatus("loading");
 
-        // Dynamically alter prompt based on Databricks prediction
-        let PROMPT_TEXT = "Good afternoon. I'm here if you want to reflect on your day or just take a breather. Just tap the button to start chatting when you're ready.";
+        let promptText = "Good afternoon. I'm here if you want to reflect on your day or just take a breather. Just tap the button to start chatting when you're ready.";
 
         if (prediction || phqPrediction) {
-            let insights = [];
+            const insights = [];
             if (prediction && prediction.risk_tier > 0) {
                 insights.push(`experiencing some ${prediction.predicted_class}`);
             }
@@ -31,8 +37,7 @@ export default function HomePage() {
             }
 
             if (insights.length > 0) {
-                const combinedInsights = insights.join(" and ");
-                PROMPT_TEXT = `Hi there. Based on the background signals, it seems like you might be ${combinedInsights}. I'm here whenever you're ready to talk about it, or even if you just need a brief distraction.`;
+                promptText = `Hi there. Based on the background signals, it seems like you might be ${insights.join(" and ")}. I'm here whenever you're ready to talk about it, or even if you just need a brief distraction.`;
             }
         }
 
@@ -46,7 +51,7 @@ export default function HomePage() {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        text: PROMPT_TEXT,
+                        text: promptText,
                         model_id: "eleven_turbo_v2",
                         voice_settings: { stability: 0.75, similarity_boost: 0.85, style: 0.2 },
                     }),
@@ -84,9 +89,6 @@ export default function HomePage() {
         setStatus("idle");
     };
 
-    const riskTier = interventionPlan?.tier ?? ensembleDecision?.tier ?? 0;
-    const riskMeta = RISK_TIERS[riskTier] || RISK_TIERS[0];
-
     return (
         <div className="animate-fade-in" style={{ padding: '40px 24px', maxWidth: '600px', margin: '0 auto' }}>
             <header style={{ marginBottom: '32px' }}>
@@ -96,6 +98,7 @@ export default function HomePage() {
                 <h1 className="display" style={{ fontSize: '32px', margin: 0, lineHeight: 1.2 }}>
                     Ready to take a mind trace?
                 </h1>
+
                 <div style={{
                     marginTop: '14px',
                     display: 'inline-flex',
@@ -112,9 +115,24 @@ export default function HomePage() {
                     <ShieldAlert size={14} />
                     Current Risk: {riskMeta.label}
                 </div>
+
+                <div style={{
+                    marginTop: '10px',
+                    background: 'white',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: '14px',
+                    padding: '12px',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                        <Target size={16} color="var(--color-primary)" />
+                        <strong style={{ fontSize: '14px' }}>GrowthFactor Streak: {streak} day{streak === 1 ? '' : 's'}</strong>
+                    </div>
+                    <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', lineHeight: 1.4 }}>
+                        {growthNudge}
+                    </div>
+                </div>
             </header>
 
-            {/* Hero Card */}
             <div
                 className="card"
                 onClick={() => navigate('/chat')}
@@ -135,7 +153,7 @@ export default function HomePage() {
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         <div
-                            onClick={(e) => navigate('/chat')}
+                            onClick={() => navigate('/chat')}
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.2)', padding: '8px 16px', borderRadius: '20px', fontSize: '14px', fontWeight: 500 }}
                         >
                             Open Chat
@@ -162,7 +180,6 @@ export default function HomePage() {
                         </div>
                     </div>
                 </div>
-                {/* Decorative circle */}
                 <div style={{
                     position: 'absolute',
                     right: '-20px',
