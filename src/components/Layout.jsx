@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Home, MessageCircle, ShieldCheck, Sparkles, ClipboardList } from 'lucide-react';
+import moodlensLogo from '../../images/moodlens_crop.png';
 
 export default function Layout() {
     const location = useLocation();
@@ -31,8 +32,7 @@ export default function Layout() {
             <div className="top-ribbon-wrap">
                 <div className="top-ribbon">
                     <div className="brand-mark">
-                        <span className="brand-glyph">🌿</span>
-                        <span className="brand-text">MoodLens</span>
+                        <img src={moodlensLogo} alt="MoodLens logo" className="brand-logo" />
                     </div>
                     <button
                         type="button"
