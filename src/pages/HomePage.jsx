@@ -1,14 +1,15 @@
 import { useState, useRef } from 'react';
-import { PlayCircle, Square, Loader, Moon, Sun, Heart } from 'lucide-react';
+import { PlayCircle, Square, Loader, Moon, Heart, ShieldAlert } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useGlobalState } from '../GlobalStateProvider';
+import { RISK_TIERS } from '../riskUtils';
 
 const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICE_ID = import.meta.env.VITE_ELEVENLABS_VOICE_ID;
 
 export default function HomePage() {
     const navigate = useNavigate();
-    const { prediction, phqPrediction, isScoring } = useGlobalState();
+    const { prediction, phqPrediction, isScoring, interventionPlan, ensembleDecision } = useGlobalState();
     const [status, setStatus] = useState("idle");
     const audioRef = useRef(null);
 
@@ -83,6 +84,9 @@ export default function HomePage() {
         setStatus("idle");
     };
 
+    const riskTier = interventionPlan?.tier ?? ensembleDecision?.tier ?? 0;
+    const riskMeta = RISK_TIERS[riskTier] || RISK_TIERS[0];
+
     return (
         <div className="animate-fade-in" style={{ padding: '40px 24px', maxWidth: '600px', margin: '0 auto' }}>
             <header style={{ marginBottom: '32px' }}>
@@ -92,6 +96,22 @@ export default function HomePage() {
                 <h1 className="display" style={{ fontSize: '32px', margin: 0, lineHeight: 1.2 }}>
                     Ready to take a mind trace?
                 </h1>
+                <div style={{
+                    marginTop: '14px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 12px',
+                    borderRadius: '999px',
+                    background: '#fff',
+                    border: '1px solid var(--color-border)',
+                    color: riskMeta.color,
+                    fontSize: '13px',
+                    fontWeight: 700,
+                }}>
+                    <ShieldAlert size={14} />
+                    Current Risk: {riskMeta.label}
+                </div>
             </header>
 
             {/* Hero Card */}
@@ -166,12 +186,12 @@ export default function HomePage() {
                     <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-text-muted)' }}>View your trends</p>
                 </div>
 
-                <div className="card" style={{ cursor: 'pointer', padding: '20px' }}>
+                <div className="card" onClick={() => navigate('/safety')} style={{ cursor: 'pointer', padding: '20px' }}>
                     <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', color: 'var(--color-accent)' }}>
                         <Moon size={20} />
                     </div>
-                    <h4 style={{ margin: '0 0 4px', fontSize: '15px' }}>Sleep sounds</h4>
-                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-text-muted)' }}>Wind down</p>
+                    <h4 style={{ margin: '0 0 4px', fontSize: '15px' }}>Safety Protocol</h4>
+                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-text-muted)' }}>Escalation and support</p>
                 </div>
             </div>
         </div>

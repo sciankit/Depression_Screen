@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useGlobalState } from '../GlobalStateProvider';
 
 export default function ChatPage() {
-    const { scoreModel } = useGlobalState();
+    const { scoreModel, interventionPlan, ensembleDecision } = useGlobalState();
     const [messages, setMessages] = useState([
         { id: 1, text: "Hi there. I'm here if you want to reflect on your day or just take a breather. How are you feeling right now?", sender: 'bot' }
     ]);
@@ -27,6 +28,8 @@ export default function ChatPage() {
         setMessages(updatedMessages);
         setInput('');
 
+        const tier = interventionPlan?.tier ?? ensembleDecision?.tier ?? 0;
+
         // 1. Mock bot response (acting as the conversational agent)
         setTimeout(() => {
             let reply = "I hear you. Taking a moment to acknowledge that is a great first step.";
@@ -34,6 +37,10 @@ export default function ChatPage() {
                 reply = "It sounds like you've had a lot on your plate. Maybe a short breathing exercise could help settle your mind when you're ready.";
             } else if (input.toLowerCase().includes('good') || input.toLowerCase().includes('great')) {
                 reply = "That's wonderful to hear. Holding onto that positive energy can really carry you through the rest of the week.";
+            } else if (tier >= 2) {
+                reply = "Thank you for sharing that. I strongly recommend opening the Safety Protocol now so we can connect you with immediate support resources.";
+            } else if (tier === 1) {
+                reply = "I notice elevated stress trends. A short walk, hydration, and one trusted check-in could help stabilize your day.";
             }
             setMessages(prev => [...prev, { id: Date.now() + 1, text: reply, sender: 'bot' }]);
         }, 1200);
@@ -75,6 +82,21 @@ export default function ChatPage() {
 
             {/* Messages Area */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {(interventionPlan?.tier ?? ensembleDecision?.tier ?? 0) >= 1 && (
+                    <div style={{
+                        border: '1px solid #f1d8c2',
+                        background: '#fff8f2',
+                        borderRadius: '12px',
+                        padding: '12px',
+                        fontSize: '13px',
+                        color: '#7b4a1e'
+                    }}>
+                        Elevated risk detected from passive signals.
+                        <Link to="/safety" style={{ color: '#b85e1f', marginLeft: '6px', textDecoration: 'underline' }}>
+                            Open safety protocol
+                        </Link>
+                    </div>
+                )}
                 {messages.map(msg => (
                     <div key={msg.id} style={{
                         alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',

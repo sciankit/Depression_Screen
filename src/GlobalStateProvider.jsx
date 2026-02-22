@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect, useContext } from 'react';
+import { buildExplainabilitySummary, buildInterventionPlan } from './riskUtils';
 
 const GlobalStateContext = createContext(null);
 
@@ -34,6 +35,8 @@ export function GlobalStateProvider({ children }) {
     const [prediction, setPrediction] = useState(null);
     const [phqPrediction, setPhqPrediction] = useState(null);
     const [ensembleDecision, setEnsembleDecision] = useState(null);
+    const [interventionPlan, setInterventionPlan] = useState(null);
+    const [explainability, setExplainability] = useState([]);
     const [isScoring, setIsScoring] = useState(true);
 
     useEffect(() => {
@@ -45,6 +48,8 @@ export function GlobalStateProvider({ children }) {
 
             const decision = finalEnsembleDecision(phqScore, prediction);
             setEnsembleDecision(decision);
+            setInterventionPlan(buildInterventionPlan(decision, prediction, phqPrediction));
+            setExplainability(buildExplainabilitySummary(prediction));
         }
     }, [prediction, phqPrediction]);
 
@@ -161,7 +166,16 @@ export function GlobalStateProvider({ children }) {
     }
 
     return (
-        <GlobalStateContext.Provider value={{ prediction, phqPrediction, ensembleDecision, isScoring, scoreModel, scorePhqModel }}>
+        <GlobalStateContext.Provider value={{
+            prediction,
+            phqPrediction,
+            ensembleDecision,
+            interventionPlan,
+            explainability,
+            isScoring,
+            scoreModel,
+            scorePhqModel,
+        }}>
             {children}
         </GlobalStateContext.Provider>
     );

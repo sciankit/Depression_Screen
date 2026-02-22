@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Activity, Phone, MessageSquare, History, Shield, CheckCircle2, Clock } from 'lucide-react';
+import { Activity, Phone, MessageSquare, History, Shield, CheckCircle2, Clock, Download } from 'lucide-react';
 
 // ─── Constants ─────────────────────────────────────────────────────────────
 const INTERVAL_MS = 15 * 60 * 1000;
@@ -154,6 +154,24 @@ export default function CollectorPage() {
     const [lastCollected, setLastCollected] = useState(null);
     const countdownRef = useRef(null);
 
+    const exportSnapshot = () => {
+        const payload = {
+            exportedAt: new Date().toISOString(),
+            latestMetrics,
+            callLogs,
+            smsLogs,
+            history,
+            schema: "wearables-risk-v1",
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `mindtrace_snapshot_${Date.now()}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
     const collect = useCallback(() => {
         setIsCollecting(true);
         setTimeout(() => {
@@ -228,6 +246,18 @@ export default function CollectorPage() {
                             <Clock size={14} /> 00:0{countdown}
                         </div>
                         <div style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginTop: '2px' }}>Next automated ping</div>
+                    </div>
+                </div>
+
+                <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <button onClick={exportSnapshot} className="btn-primary" style={{ padding: '10px 16px', fontSize: '13px' }}>
+                        <Download size={14} /> Export JSON Snapshot
+                    </button>
+                    <div style={{ padding: '10px 14px', borderRadius: '999px', border: '1px solid var(--color-border)', background: '#fff', fontSize: '12px', fontWeight: 600 }}>
+                        Actian-ready structured features
+                    </div>
+                    <div style={{ padding: '10px 14px', borderRadius: '999px', border: '1px solid var(--color-border)', background: '#fff', fontSize: '12px', fontWeight: 600 }}>
+                        Sphinx docs schema compatible
                     </div>
                 </div>
             </div>
