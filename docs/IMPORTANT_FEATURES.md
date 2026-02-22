@@ -1,4 +1,4 @@
-# Must-Add Features for MindTrace (High Priority)
+# Must-Add Features for MoodLens (High Priority)
 
 This list captures features that are highly valuable for safety, technical depth, and hackathon judging impact.
 

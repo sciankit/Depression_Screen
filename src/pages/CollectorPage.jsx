@@ -169,7 +169,7 @@ export default function CollectorPage() {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `mindtrace_snapshot_${Date.now()}.json`;
+        link.download = `MoodLens_snapshot_${Date.now()}.json`;
         link.click();
         URL.revokeObjectURL(url);
     };

@@ -1,4 +1,4 @@
-MindTrace Explainability Docs
+MoodLens Explainability Docs
 =============================
 
 .. toctree::

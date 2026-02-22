@@ -251,7 +251,7 @@ export default function ChatPage() {
 
                         return (
                             <div key={msg.id} className={rowClass}>
-                                {msg.sender === 'bot' && <span className="chat-sender">MindTrace</span>}
+                                {msg.sender === 'bot' && <span className="chat-sender">MoodLens</span>}
                                 <div className={bubbleClass}>{msg.text}</div>
                             </div>
                         );

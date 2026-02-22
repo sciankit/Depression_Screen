@@ -50,7 +50,7 @@ export function buildVectorEventWindow({ metrics, callLogs, smsLogs, riskTier = 
         },
         embedding,
         metadata: {
-            source: 'mindtrace-demo',
+            source: 'MoodLens-demo',
             normalization: 'z-score-baseline-relative',
         },
     };

@@ -4,7 +4,7 @@ import path from 'node:path';
 const OUT_DIR = path.resolve('docs', 'sphinx');
 
 const modelCard = {
-    name: 'MindTrace Passive Risk Stratification',
+    name: 'MoodLens Passive Risk Stratification',
     version: '0.1.0',
     intendedUse: 'Early warning and behavioral support for mental-health risk trends. Not diagnostic.',
     inputs: [
@@ -53,7 +53,7 @@ function heading(text, level = '=') {
 }
 
 function buildIndexRst() {
-    return `${heading('MindTrace Explainability Docs')}` +
+    return `${heading('MoodLens Explainability Docs')}` +
 `.. toctree::
    :maxdepth: 2
 

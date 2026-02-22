@@ -69,7 +69,7 @@ const ChartCard = ({ title, subtitle, emoji, children }) => (
   </div>
 );
 
-export default function MindTrace() {
+export default function MoodLens() {
   return (
     <section style={{
       padding: "24px 0 16px",

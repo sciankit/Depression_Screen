@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'mindtrace_growthfactor_v1';
+const STORAGE_KEY = 'MoodLens_growthfactor_v1';
 
 function todayISO() {
     return new Date().toISOString().slice(0, 10);

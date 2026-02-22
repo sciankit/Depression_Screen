@@ -4,7 +4,7 @@
 Depression and related risk states are often detected too late.
 
 ## Solution
-MindTrace combines wearable biomarkers, risk-tier modeling, and intervention policy logic.
+MoodLens combines wearable biomarkers, risk-tier modeling, and intervention policy logic.
 
 ## What We Built
 - Multimodal passive signal ingestion

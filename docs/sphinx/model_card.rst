@@ -6,7 +6,7 @@ Overview
 --------
 
 
-**Name:** MindTrace Passive Risk Stratification
+**Name:** MoodLens Passive Risk Stratification
 
 **Version:** 0.1.0
 

@@ -5,7 +5,7 @@ import { Home, MessageCircle, ShieldCheck, Sparkles, ClipboardList } from 'lucid
 export default function Layout() {
     const location = useLocation();
     const [theme, setTheme] = useState(() => {
-        const stored = localStorage.getItem('mindtrace-theme');
+        const stored = localStorage.getItem('MoodLens-theme');
         return stored ? stored : 'dark';
     });
 
@@ -15,7 +15,7 @@ export default function Layout() {
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('mindtrace-theme', theme);
+        localStorage.setItem('MoodLens-theme', theme);
     }, [theme]);
 
     const navItems = [
@@ -32,7 +32,7 @@ export default function Layout() {
                 <div className="top-ribbon">
                     <div className="brand-mark">
                         <span className="brand-glyph">🌿</span>
-                        <span className="brand-text">MindTrace</span>
+                        <span className="brand-text">MoodLens</span>
                     </div>
                     <button
                         type="button"

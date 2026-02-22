@@ -1,6 +1,6 @@
-# MindTrace: Early Mental Health Risk Detection with Wearable Signals
+# MoodLens: Early Mental Health Risk Detection with Wearable Signals
 
-MindTrace is an AI-assisted early warning system for depression risk, burnout drift, and potential crisis patterns using wearable + passive behavioral signals.
+MoodLens is an AI-assisted early warning system for depression risk, burnout drift, and potential crisis patterns using wearable + passive behavioral signals.
 
 The project combines:
 - Databricks-hosted model inference for text + PHQ style scoring
@@ -11,7 +11,7 @@ The project combines:
 ## Problem
 Depression, substance-use relapse, and suicidal risk often worsen before visible crisis events. Most people carry devices that already track useful proxy signals (sleep regularity, heart-rate variability, activity rhythm, communication patterns).
 
-MindTrace uses these streams as **early-warning markers**, not diagnosis.
+MoodLens uses these streams as **early-warning markers**, not diagnosis.
 
 ## Core Flow
 1. Collect multimodal telemetry (wearable + phone activity proxies).
@@ -109,4 +109,4 @@ VITE_ELEVENLABS_VOICE_ID=...
 ```
 
 ## Safety Note
-MindTrace is a prevention and support assistant. It is not a medical diagnosis tool and does not replace licensed mental-health professionals or emergency services.
+MoodLens is a prevention and support assistant. It is not a medical diagnosis tool and does not replace licensed mental-health professionals or emergency services.
