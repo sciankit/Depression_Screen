@@ -5,6 +5,7 @@ import StatsPage from './pages/StatsPage';
 import ChatPage from './pages/ChatPage';
 import CollectorPage from './pages/CollectorPage';
 import SafetyPage from './pages/SafetyPage';
+import ImpactPage from './pages/ImpactPage';
 import { GlobalStateProvider } from './GlobalStateProvider';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
             <Route path="chat" element={<ChatPage />} />
             <Route path="data" element={<CollectorPage />} />
             <Route path="safety" element={<SafetyPage />} />
+            <Route path="impact" element={<ImpactPage />} />
           </Route>
         </Routes>
       </Router>

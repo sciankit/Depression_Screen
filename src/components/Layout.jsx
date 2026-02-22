@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { Home, BarChart2, MessageCircle, Activity, ShieldAlert } from 'lucide-react';
+import { Home, BarChart2, MessageCircle, Activity, ShieldAlert, Globe2 } from 'lucide-react';
 
 export default function Layout() {
     const navItems = [
@@ -7,6 +7,7 @@ export default function Layout() {
         { name: 'Chat', path: '/chat', icon: MessageCircle },
         { name: 'Data', path: '/data', icon: Activity },
         { name: 'Safety', path: '/safety', icon: ShieldAlert },
+        { name: 'Impact', path: '/impact', icon: Globe2 },
         { name: 'Stats', path: '/stats', icon: BarChart2 },
     ];
 
