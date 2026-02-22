@@ -148,7 +148,7 @@ a {
   -webkit-backdrop-filter: blur(14px);
   background: rgba(255, 255, 255, 0.76);
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 4px;
   padding: 8px;
   z-index: 40;
@@ -216,6 +216,183 @@ a {
   animation: bob 3.6s ease-in-out infinite;
 }
 
+.demo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 12px;
+}
+
+.demo-pulse-glow {
+  position: absolute;
+  right: -70px;
+  top: -70px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 95, 46, 0.36) 0%, rgba(255, 95, 46, 0) 68%);
+}
+
+.demo-select {
+  width: 100%;
+  margin-top: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  padding: 9px 10px;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.demo-metric-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.demo-mini-label {
+  font-size: 11px;
+  color: var(--color-muted);
+  margin-bottom: 2px;
+}
+
+.demo-progress-wrap {
+  width: 100%;
+  border-radius: 999px;
+  background: rgba(30, 40, 38, 0.08);
+  height: 9px;
+  overflow: hidden;
+}
+
+.demo-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ff5f2e, #ffbf52, #0a8f7b);
+  transition: width 0.2s ease;
+}
+
+.demo-option-btn {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 10px 12px;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.demo-option-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 95, 46, 0.45);
+}
+
+.demo-complete-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.64);
+}
+
+.demo-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 9px 10px;
+  font-size: 14px;
+  line-height: 1.4;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.demo-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.demo-escalation-box {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.64);
+}
+
+.demo-resource-link {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.demo-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.demo-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 560px;
+  font-size: 13px;
+}
+
+.demo-table th,
+.demo-table td {
+  text-align: left;
+  padding: 9px 10px;
+  border-bottom: 1px solid rgba(30, 40, 38, 0.08);
+  vertical-align: top;
+}
+
+.demo-table th {
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.demo-status-pill {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.demo-kpi-row {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
 @media (max-width: 640px) {
   .screen-wrap {
     padding: 22px 14px 110px;
@@ -228,5 +405,22 @@ a {
   .card {
     border-radius: 18px;
     padding: 14px;
+  }
+
+  .dock-nav {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .dock-link {
+    font-size: 10px;
+    padding: 9px 2px;
+  }
+
+  .demo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .demo-metric-strip {
+    grid-template-columns: 1fr;
   }
 }
