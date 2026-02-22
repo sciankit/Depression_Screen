@@ -25,7 +25,10 @@ export default function Layout() {
         <div className="app-shell">
             <div className="top-ribbon-wrap">
                 <div className="top-ribbon">
-                    <div className="brand-mark">MindTrace</div>
+                    <div className="brand-mark">
+                        <span className="brand-glyph">M</span>
+                        <span>MindTrace</span>
+                    </div>
                     <button
                         type="button"
                         className="chip"

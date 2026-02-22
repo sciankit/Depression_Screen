@@ -25,6 +25,7 @@ const QUICK_ACTIONS = [
     { label: 'Plan', route: '/plan' },
     { label: 'Care', route: '/safety' },
     { label: 'Story', route: '/stats' },
+    { label: 'Action Plan', route: '/plan' },
 ];
 
 function clamp(value, min = 0, max = 100) {
@@ -38,6 +39,34 @@ function buildSignalModel(riskTier, streak) {
     const readiness = clamp(Math.round((sleep + (100 - stress) + social) / 3));
 
     return { sleep, stress, social, readiness };
+}
+
+function HeroGraphic() {
+    return (
+        <div className="home-pro-art" aria-hidden="true">
+            <svg viewBox="0 0 320 240" role="presentation">
+                <defs>
+                    <linearGradient id="heroStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="rgba(255,255,255,0.95)" />
+                        <stop offset="100%" stopColor="rgba(255,255,255,0.45)" />
+                    </linearGradient>
+                    <linearGradient id="heroFill" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="rgba(255,255,255,0.26)" />
+                        <stop offset="100%" stopColor="rgba(255,255,255,0.06)" />
+                    </linearGradient>
+                </defs>
+
+                <rect x="18" y="24" width="284" height="190" rx="28" fill="url(#heroFill)" stroke="url(#heroStroke)" />
+                <circle cx="72" cy="88" r="27" fill="rgba(255,255,255,0.22)" />
+                <path d="M55 89h34" stroke="rgba(255,255,255,0.7)" strokeWidth="4" strokeLinecap="round" />
+                <path d="M72 72v34" stroke="rgba(255,255,255,0.7)" strokeWidth="4" strokeLinecap="round" />
+
+                <path d="M116 147c14-23 25-6 35-21 9-14 20 7 32-10 10-15 18 7 36-13" stroke="rgba(255,255,255,0.78)" strokeWidth="4" fill="none" strokeLinecap="round" />
+                <path d="M118 172h118" stroke="rgba(255,255,255,0.42)" strokeWidth="4" strokeLinecap="round" />
+                <path d="M118 188h88" stroke="rgba(255,255,255,0.3)" strokeWidth="4" strokeLinecap="round" />
+            </svg>
+        </div>
+    );
 }
 
 export default function HomePage() {
@@ -136,30 +165,24 @@ export default function HomePage() {
 
     return (
         <div className="screen-wrap home-simplified-wrap animate-fade-in">
-            <section className="card home-chat-card reveal-1">
-                <div className="home-chat-glow" />
-                <div className="home-chat-glow second" />
-                <div style={{ position: 'relative', zIndex: 2 }}>
-                    <div className="chip home-chat-chip">
+            <section className="card home-pro-hero reveal-1">
+                <div className="home-pro-content">
+                    <div className="chip home-pro-chip">
                         <span style={{ width: 8, height: 8, borderRadius: 99, background: riskMeta.color }} />
                         {riskMeta.label} support
                     </div>
 
-                    <h1 className="display home-chat-title">Daily Check-in</h1>
-                    <p className="home-chat-subtitle">Take 2 minutes to talk with your mindful companion about your day.</p>
+                    <h1 className="display home-pro-title">Daily Check-in</h1>
+                    <p className="home-pro-subtitle">Take 2 minutes to talk with your mindful companion about your day.</p>
 
-                    <div className="home-chat-actions">
-                        <button className="home-pill-btn" onClick={() => navigate('/chat')}>
+                    <div className="home-pro-actions">
+                        <button className="home-pro-btn" onClick={() => navigate('/chat')}>
                             <MessageCircle size={14} /> Text Chat
                         </button>
-                        <button className="home-pill-btn" onClick={() => navigate('/chat')}>
+                        <button className="home-pro-btn" onClick={() => navigate('/chat')}>
                             <PhoneCall size={14} /> Voice Call
                         </button>
-                        <button
-                            className="home-pill-btn home-pill-btn-solid"
-                            onClick={status === 'playing' ? stopPrompt : playPrompt}
-                            disabled={isScoring}
-                        >
+                        <button className="home-pro-btn home-pro-btn-solid" onClick={status === 'playing' ? stopPrompt : playPrompt} disabled={isScoring}>
                             {isScoring && <Loader size={14} className="animate-spin" />}
                             {!isScoring && status === 'idle' && <PlayCircle size={14} />}
                             {!isScoring && status === 'loading' && <Loader size={14} className="animate-spin" />}
@@ -168,6 +191,8 @@ export default function HomePage() {
                         </button>
                     </div>
                 </div>
+
+                <HeroGraphic />
             </section>
 
             <section className="home-signal-grid reveal-2">
