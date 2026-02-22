@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Activity, Phone, MessageSquare, History, Shield, CheckCircle2, Clock, Download } from 'lucide-react';
+import { buildVectorEventWindow, findMostSimilarCases } from '../vectorai/vectorPayload';
 
 // ─── Constants ─────────────────────────────────────────────────────────────
 const INTERVAL_MS = 15 * 60 * 1000;
@@ -149,6 +150,7 @@ export default function CollectorPage() {
     const [callLogs, setCallLogs] = useState([]);
     const [smsLogs, setSmsLogs] = useState([]);
     const [history, setHistory] = useState([]);
+    const [vectorEvent, setVectorEvent] = useState(null);
     const [countdown, setCountdown] = useState(DEMO_POLL_MS / 1000);
     const [isCollecting, setIsCollecting] = useState(false);
     const [lastCollected, setLastCollected] = useState(null);
@@ -189,6 +191,12 @@ export default function CollectorPage() {
                     ...prev,
                 ])
             );
+            setVectorEvent(buildVectorEventWindow({
+                metrics,
+                callLogs: calls,
+                smsLogs: sms,
+                riskTier: Math.random() > 0.7 ? 1 : 0,
+            }));
             setLastCollected(ts);
             setIsCollecting(false);
         }, 600);
@@ -211,6 +219,7 @@ export default function CollectorPage() {
         { id: 'calls', icon: Phone, label: 'Calls' },
         { id: 'sms', icon: MessageSquare, label: 'SMS' },
         { id: 'history', icon: History, label: 'History' },
+        { id: 'vector', icon: Activity, label: 'VectorAI' },
         { id: 'permissions', icon: Shield, label: 'Perms' },
     ];
 
@@ -387,6 +396,64 @@ export default function CollectorPage() {
                                     <CheckCircle2 color="var(--color-primary)" size={20} />
                                 </div>
                             ))}
+                    </div>
+                )}
+
+                {/* ── VECTORAI ── */}
+                {tab === "vector" && (
+                    <div className="card" style={{ padding: '20px' }}>
+                        <h3 style={{ marginTop: 0, marginBottom: '8px' }}>Vector Event Window</h3>
+                        <p style={{ fontSize: '14px', color: 'var(--color-text-muted)', marginTop: 0 }}>
+                            Structured payload for VectorAI indexing and similar-case retrieval.
+                        </p>
+                        {!vectorEvent ? (
+                            <div style={{ color: 'var(--color-text-muted)' }}>Waiting for first window...</div>
+                        ) : (
+                            <>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+                                    <div style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '10px' }}>
+                                        <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>Schema</div>
+                                        <div style={{ fontWeight: 600 }}>{vectorEvent.schemaVersion}</div>
+                                    </div>
+                                    <div style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '10px' }}>
+                                        <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>Risk Tier</div>
+                                        <div style={{ fontWeight: 600 }}>{vectorEvent.riskTier}</div>
+                                    </div>
+                                </div>
+
+                                <div style={{ marginBottom: '10px', fontWeight: 600 }}>Embedding Preview</div>
+                                <div style={{
+                                    borderRadius: '10px',
+                                    border: '1px solid var(--color-border)',
+                                    background: '#fff',
+                                    padding: '10px',
+                                    fontSize: '12px',
+                                    fontFamily: 'monospace',
+                                    lineHeight: 1.6,
+                                    wordBreak: 'break-all',
+                                    marginBottom: '14px',
+                                }}>
+                                    [{vectorEvent.embedding.join(', ')}]
+                                </div>
+
+                                <div style={{ marginBottom: '10px', fontWeight: 600 }}>Most Similar Cases</div>
+                                {findMostSimilarCases(vectorEvent.embedding).map((item) => (
+                                    <div key={item.id} style={{
+                                        border: '1px solid var(--color-border)',
+                                        borderRadius: '10px',
+                                        padding: '10px',
+                                        marginBottom: '8px',
+                                        background: 'var(--color-bg-card)',
+                                    }}>
+                                        <div style={{ fontSize: '13px', fontWeight: 600 }}>{item.id}</div>
+                                        <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '2px' }}>
+                                            Similarity: {(item.similarity * 100).toFixed(2)}%
+                                        </div>
+                                        <div style={{ marginTop: '6px', fontSize: '13px' }}>{item.intervention}</div>
+                                    </div>
+                                ))}
+                            </>
+                        )}
                     </div>
                 )}
 
