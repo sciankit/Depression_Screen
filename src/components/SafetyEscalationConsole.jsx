@@ -96,36 +96,38 @@ export default function SafetyEscalationConsole({ tier }) {
 
     return (
         <section className="card" style={{ marginTop: '16px' }}>
-            <h3 style={{ marginTop: 0, marginBottom: '8px' }}>Escalation Preferences</h3>
-            <p style={{ marginTop: 0, color: 'var(--color-text-muted)', fontSize: '14px' }}>
+            <h3 style={{ marginTop: 0, marginBottom: '8px', fontSize: '18px' }}><span className="section-icon">⚙️</span>Escalation Preferences</h3>
+            <p style={{ marginTop: 0, color: 'var(--color-text-muted)', fontSize: '14px', lineHeight: 1.6 }}>
                 Configure trusted contacts and explicit consent paths. Preferences are stored locally on this device for the demo.
             </p>
 
-            <div style={{ display: 'grid', gap: '10px', marginBottom: '16px' }}>
-                <label style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '14px' }}>
+            <div style={{ display: 'grid', gap: '10px', marginBottom: '18px' }}>
+                <label className="demo-toggle-row">
                     <input type="checkbox" checked={consentTrustedContact} onChange={onToggleTrusted} />
                     Allow trusted-contact alerts for moderate/critical tiers
                 </label>
-                <label style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '14px' }}>
+                <label className="demo-toggle-row">
                     <input type="checkbox" checked={consentClinicalEscalation} onChange={onToggleClinical} />
                     Allow clinician/social-service escalation for critical tier
                 </label>
             </div>
 
-            <div style={{ marginBottom: '12px', fontWeight: 600 }}>Trusted Contacts</div>
-            <div style={{ display: 'grid', gap: '8px', marginBottom: '14px' }}>
+            <div style={{ marginBottom: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '18px' }}>👥</span> Trusted Contacts
+            </div>
+            <div style={{ display: 'grid', gap: '10px', marginBottom: '16px' }}>
                 {contacts.map((contact) => (
                     <div
                         key={contact.id}
                         style={{
-                            border: '1px solid var(--color-border)',
-                            borderRadius: '10px',
-                            padding: '10px',
-                            background: 'var(--surface)',
+                            borderRadius: '18px',
+                            padding: '14px',
+                            background: 'var(--surface-strong)',
                             display: 'flex',
                             justifyContent: 'space-between',
-                            gap: '8px',
+                            gap: '10px',
                             alignItems: 'center',
+                            boxShadow: '0 2px 8px rgba(180, 140, 100, 0.04)',
                         }}
                     >
                         <div>
@@ -138,12 +140,15 @@ export default function SafetyEscalationConsole({ tier }) {
                             type="button"
                             onClick={() => removeContact(contact.id)}
                             style={{
-                                border: '1px solid color-mix(in srgb, var(--color-danger) 36%, var(--color-border))',
+                                border: 'none',
                                 background: 'var(--color-danger-soft)',
                                 color: 'var(--color-danger)',
-                                borderRadius: '8px',
-                                padding: '6px 10px',
+                                borderRadius: '12px',
+                                padding: '8px 14px',
                                 cursor: 'pointer',
+                                fontWeight: 600,
+                                fontSize: '13px',
+                                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                             }}
                         >
                             Remove
@@ -152,18 +157,32 @@ export default function SafetyEscalationConsole({ tier }) {
                 ))}
             </div>
 
-            <form onSubmit={addContact} style={{ display: 'grid', gap: '8px', marginBottom: '16px' }}>
+            <form onSubmit={addContact} style={{ display: 'grid', gap: '10px', marginBottom: '18px' }}>
                 <input
                     value={newContact.name}
                     onChange={(e) => setNewContact((prev) => ({ ...prev, name: e.target.value }))}
                     placeholder="Contact name"
-                    style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'var(--surface-strong)', color: 'var(--color-ink)' }}
+                    style={{
+                        padding: '12px 16px',
+                        borderRadius: '14px',
+                        border: 'none',
+                        background: 'var(--surface-strong)',
+                        color: 'var(--color-ink)',
+                        boxShadow: '0 2px 8px rgba(180, 140, 100, 0.04)',
+                    }}
                 />
-                <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '10px' }}>
                     <select
                         value={newContact.channel}
                         onChange={(e) => setNewContact((prev) => ({ ...prev, channel: e.target.value }))}
-                        style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'var(--surface-strong)', color: 'var(--color-ink)' }}
+                        style={{
+                            padding: '12px 14px',
+                            borderRadius: '14px',
+                            border: 'none',
+                            background: 'var(--surface-strong)',
+                            color: 'var(--color-ink)',
+                            boxShadow: '0 2px 8px rgba(180, 140, 100, 0.04)',
+                        }}
                     >
                         <option>SMS</option>
                         <option>Call</option>
@@ -173,19 +192,26 @@ export default function SafetyEscalationConsole({ tier }) {
                         value={newContact.value}
                         onChange={(e) => setNewContact((prev) => ({ ...prev, value: e.target.value }))}
                         placeholder="Phone or email"
-                        style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'var(--surface-strong)', color: 'var(--color-ink)' }}
+                        style={{
+                            padding: '12px 16px',
+                            borderRadius: '14px',
+                            border: 'none',
+                            background: 'var(--surface-strong)',
+                            color: 'var(--color-ink)',
+                            boxShadow: '0 2px 8px rgba(180, 140, 100, 0.04)',
+                        }}
                     />
                 </div>
-                <button type="submit" className="btn-primary" style={{ width: 'fit-content', padding: '10px 14px', fontSize: '13px' }}>
+                <button type="submit" className="btn-primary" style={{ width: 'fit-content', padding: '12px 18px', fontSize: '13px' }}>
                     Add Contact
                 </button>
             </form>
 
-            <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '12px' }}>
-                <button type="button" onClick={triggerEscalation} className="btn-primary" style={{ padding: '10px 14px', fontSize: '13px' }}>
+            <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '14px' }}>
+                <button type="button" onClick={triggerEscalation} className="btn-primary" style={{ padding: '12px 18px', fontSize: '13px' }}>
                     Simulate Escalation Dispatch
                 </button>
-                <p style={{ margin: '8px 0 0', color: 'var(--color-text-muted)', fontSize: '13px' }}>
+                <p style={{ margin: '10px 0 0', color: 'var(--color-text-muted)', fontSize: '13px', lineHeight: 1.6 }}>
                     Routing preview: {canEscalateToContacts ? `${contacts.length} trusted contact(s)` : 'No trusted-contact dispatch'}.
                     {consentClinicalEscalation && tier >= 2 ? ' Clinical escalation enabled.' : ' Clinical escalation not triggered.'}
                 </p>

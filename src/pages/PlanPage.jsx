@@ -1,9 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
-  AlertTriangle,
   CheckCircle2,
   ChevronRight,
-  ClipboardList,
   HeartPulse,
   LineChart as LineChartIcon,
   ShieldCheck,
@@ -42,8 +40,8 @@ function buildUserTrend(baseTier) {
 
 function ResourceLinks() {
   return (
-    <div style={{ display: 'grid', gap: '8px' }}>
-      {CRISIS_RESOURCES.map((resource) => (
+    <div style={{ display: 'grid', gap: '10px' }}>
+      {CRISIS_RESOURCES.map((resource, idx) => (
         <a
           key={resource.label}
           href={resource.href}
@@ -51,11 +49,14 @@ function ResourceLinks() {
           rel={resource.href.startsWith('http') ? 'noopener noreferrer' : undefined}
           className="demo-resource-link"
         >
-          <div>
-            <div style={{ fontWeight: 700, fontSize: '13px' }}>{resource.label}</div>
-            <div className="text-muted" style={{ fontSize: '12px' }}>{resource.detail}</div>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <span style={{ fontSize: '18px' }}>{['📱', '🚨', '🗺️'][idx]}</span>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: '13px' }}>{resource.label}</div>
+              <div className="text-muted" style={{ fontSize: '12px' }}>{resource.detail}</div>
+            </div>
           </div>
-          <div style={{ fontSize: '12px', fontWeight: 700 }}>{resource.value}</div>
+          <div style={{ fontSize: '12px', fontWeight: 600 }}>{resource.value}</div>
         </a>
       ))}
     </div>
@@ -84,26 +85,24 @@ export default function PlanPage() {
 
   return (
     <div className="screen-wrap animate-fade-in" style={{ maxWidth: '920px' }}>
-      <section className="card" style={{ marginBottom: '12px' }}>
+      <section className="card" style={{ marginBottom: '16px', textAlign: 'center' }}>
         <div className="chip" style={{ marginBottom: '8px', color: baseMeta.color }}>
           <HeartPulse size={12} /> Current support level: {baseMeta.label}
         </div>
-        <h1 className="display" style={{ fontSize: '32px', marginBottom: '8px' }}>Your Personal Care Plan</h1>
-        <p className="text-muted" style={{ marginTop: 0, marginBottom: '10px' }}>
+        <h1 className="display" style={{ fontSize: '30px', marginBottom: '8px' }}><span className="section-icon-lg">🌈</span>Your Personal Care Plan</h1>
+        <p className="text-muted" style={{ marginTop: 0, marginBottom: '12px', maxWidth: '520px', marginInline: 'auto', lineHeight: 1.6 }}>
           Complete a fast adaptive check-in and get a plan that fits how this week is actually going.
         </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-          <div className="chip"><LineChartIcon size={12} /> Trend-aware recommendations</div>
-          <div className="chip"><ShieldCheck size={12} /> Safety guardrails included</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
+          <div className="chip">📊 Trend-aware recommendations</div>
+          <div className="chip">🛡️ Safety guardrails included</div>
         </div>
       </section>
 
-      <section className="demo-grid" style={{ marginBottom: '12px' }}>
+      <section className="demo-grid" style={{ marginBottom: '16px' }}>
         <div className="card">
-          <h3 style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <LineChartIcon size={16} color="var(--color-accent)" /> Your Weekly Risk Trend
-          </h3>
-          <p className="text-muted" style={{ marginTop: 0, fontSize: '14px' }}>
+          <h3 style={{ marginBottom: '8px', fontSize: '18px' }}><span className="section-icon">📈</span>Your Weekly Risk Trend</h3>
+          <p className="text-muted" style={{ marginTop: 0, fontSize: '14px', lineHeight: 1.6 }}>
             We watch changes over time to catch rising pressure early, not just a one-time score.
           </p>
           <div style={{ width: '100%', height: 220 }}>
@@ -113,27 +112,25 @@ export default function PlanPage() {
                 <XAxis dataKey="day" />
                 <YAxis domain={[0, 100]} />
                 <Tooltip />
-                <Line type="monotone" dataKey="risk" name="Risk" stroke="var(--color-danger)" strokeWidth={2.5} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="resilience" name="Resilience" stroke="var(--color-success)" strokeWidth={2.2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="risk" name="Risk" stroke="var(--color-danger)" strokeWidth={3} dot={{ r: 4 }} />
+                <Line type="monotone" dataKey="resilience" name="Resilience" stroke="var(--color-success)" strokeWidth={3} dot={{ r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         <div className="card">
-          <h3 style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ClipboardList size={16} color="var(--color-primary)" /> Adaptive Check-in
-          </h3>
+          <h3 style={{ marginBottom: '8px', fontSize: '18px' }}><span className="section-icon">📋</span>Adaptive Check-in</h3>
 
           <div className="demo-progress-wrap">
             <div className="demo-progress-fill" style={{ width: `${progress}%` }} />
           </div>
-          <div className="demo-mini-label" style={{ marginBottom: '8px' }}>{progress}% complete</div>
+          <div className="demo-mini-label" style={{ marginBottom: '10px' }}>{progress}% complete</div>
 
           {!screeningState.completed && currentQuestion && (
             <div>
-              <div style={{ fontWeight: 700, marginBottom: '8px', lineHeight: 1.35 }}>{currentQuestion.prompt}</div>
-              <div style={{ display: 'grid', gap: '8px' }}>
+              <div style={{ fontWeight: 600, marginBottom: '10px', lineHeight: 1.4 }}>{currentQuestion.prompt}</div>
+              <div style={{ display: 'grid', gap: '10px' }}>
                 {currentQuestion.options.map((option) => (
                   <button
                     key={option.id}
@@ -150,18 +147,18 @@ export default function PlanPage() {
 
           {screeningState.completed && (
             <div className="demo-complete-box">
-              <CheckCircle2 size={15} color="var(--color-success)" />
+              <span style={{ fontSize: '18px' }}>✅</span>
               Check-in complete. Your action plan is now personalized.
             </div>
           )}
 
-          <div style={{ marginTop: '12px' }}>
-            <div className="chip" style={{ color: screeningMeta.color, borderColor: `color-mix(in srgb, ${screeningMeta.color} 35%, var(--color-border))` }}>
+          <div style={{ marginTop: '14px' }}>
+            <div className="chip" style={{ color: screeningMeta.color }}>
               <HeartPulse size={12} /> Check-in result: {screeningMeta.label} ({screeningSummary.totalScore} pts)
             </div>
           </div>
 
-          <button className="chip" style={{ marginTop: '10px' }} onClick={() => setScreeningState(initialScreeningState())}>
+          <button className="chip" style={{ marginTop: '12px', cursor: 'pointer' }} onClick={() => setScreeningState(initialScreeningState())}>
             Reset Check-in
           </button>
         </div>
@@ -169,14 +166,14 @@ export default function PlanPage() {
 
       <section className="demo-grid">
         <div className="card">
-          <h3 style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ShieldCheck size={16} color="var(--color-accent)" /> Action Plan For {adaptivePlan.window}
+          <h3 style={{ marginBottom: '8px', fontSize: '18px' }}>
+            <span className="section-icon">🌿</span>Action Plan For {adaptivePlan.window}
           </h3>
-          <p className="text-muted" style={{ marginTop: 0, marginBottom: '10px', fontSize: '14px' }}>{adaptivePlan.title}</p>
-          <div style={{ display: 'grid', gap: '8px' }}>
+          <p className="text-muted" style={{ marginTop: 0, marginBottom: '12px', fontSize: '14px' }}>{adaptivePlan.title}</p>
+          <div style={{ display: 'grid', gap: '10px' }}>
             {adaptivePlan.actions.map((item) => (
               <div key={item} className="demo-list-item">
-                <CheckCircle2 size={14} color="var(--color-success)" />
+                <span style={{ fontSize: '16px' }}>✓</span>
                 <span>{item}</span>
               </div>
             ))}
@@ -184,10 +181,10 @@ export default function PlanPage() {
         </div>
 
         <div className="card">
-          <h3 style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <AlertTriangle size={16} color="var(--color-primary)" /> Safety and Sharing Preferences
+          <h3 style={{ marginBottom: '8px', fontSize: '18px' }}>
+            <span className="section-icon">🔒</span>Safety and Sharing Preferences
           </h3>
-          <div style={{ display: 'grid', gap: '8px', marginBottom: '10px' }}>
+          <div style={{ display: 'grid', gap: '10px', marginBottom: '14px' }}>
             <label className="demo-toggle-row">
               <input
                 type="checkbox"
@@ -206,8 +203,8 @@ export default function PlanPage() {
             </label>
           </div>
 
-          <div className="demo-escalation-box" style={{ borderColor: `color-mix(in srgb, ${effectiveMeta.color} 38%, var(--color-border))` }}>
-            <div style={{ fontWeight: 800, marginBottom: '6px', color: effectiveMeta.color }}>
+          <div className="demo-escalation-box">
+            <div style={{ fontWeight: 700, marginBottom: '6px', color: effectiveMeta.color }}>
               Current Safety Decision: {effectiveTier >= 2 ? 'Immediate Support' : effectiveTier === 1 ? 'Early Support' : 'Routine Support'}
             </div>
             <div className="text-muted" style={{ fontSize: '13px', marginBottom: '8px' }}>{effectiveMeta.summary}</div>
