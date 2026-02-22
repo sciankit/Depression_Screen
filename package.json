@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "docs:sphinx": "node scripts/generate-sphinx-docs.mjs"
+    "docs:sphinx": "node scripts/generate-sphinx-docs.mjs",
+    "submission:generate": "node scripts/generate-submission-kit.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.575.0",
