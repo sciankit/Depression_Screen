@@ -19,6 +19,7 @@ function App() {
             <Route index element={<HomePage />} />
             <Route path="stats" element={<StatsPage />} />
             <Route path="chat" element={<ChatPage />} />
+            <Route path="app-check-in" element={<ChatPage forceMode="app" />} />
             <Route path="data" element={<CollectorPage />} />
             <Route path="safety" element={<SafetyPage />} />
             <Route path="impact" element={<ImpactPage />} />

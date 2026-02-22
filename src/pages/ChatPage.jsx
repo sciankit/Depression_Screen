@@ -1,19 +1,168 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Mic, Send, Square } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useGlobalState } from '../GlobalStateProvider';
 import { calculateStreak, loadEngagementState, recordCheckIn } from '../growth/engagementEngine';
 
-export default function ChatPage() {
+function looksLikeYes(text) {
+    return /\b(yes|yeah|yep|i am|i'm|im|okay|ok|fine|good|great)\b/i.test(text);
+}
+
+function looksLikeNo(text) {
+    return /\b(no|not|dont|don't|bad|sad|anxious|stressed|overwhelmed|upset)\b/i.test(text);
+}
+
+function wantsNothing(text) {
+    return /\b(nothing|dont want|don't want|do nothing|not now|nope|idk|i dont know|i don't know)\b/i.test(text);
+}
+
+function wantsChat(text) {
+    return /\b(chat|talk|text|vent|share|conversation)\b/i.test(text);
+}
+
+function wantsSoothing(text) {
+    return /\b(music|soothing|calm|meditation|guided)\b/i.test(text);
+}
+
+function withGuided(text) {
+    return /\b(guided|with guide|with meditation|with guidance)\b/i.test(text);
+}
+
+function withoutGuided(text) {
+    return /\b(without|no guided|just music|music only|no meditation)\b/i.test(text);
+}
+
+function appFlowReply(text, stage) {
+    if (stage === 'check_okay') {
+        if (looksLikeYes(text)) {
+            return {
+                reply: 'Glad to hear that. What do you want to do right now?',
+                nextStage: 'what_want',
+                soothing: null,
+            };
+        }
+        if (looksLikeNo(text)) {
+            return {
+                reply: 'I’m here with you. What feels wrong right now?',
+                nextStage: 'what_wrong',
+                soothing: null,
+            };
+        }
+        return {
+            reply: 'I want to understand. Are you feeling okay right now?',
+            nextStage: 'check_okay',
+            soothing: null,
+        };
+    }
+
+    if (stage === 'what_wrong') {
+        return {
+            reply: 'Thank you for sharing that. Do you want to keep talking, or would soothing music help right now?',
+            nextStage: 'support_choice',
+            soothing: null,
+        };
+    }
+
+    if (stage === 'what_want') {
+        if (wantsNothing(text)) {
+            return {
+                reply: 'Would you like soothing music with guided meditation, or without guided meditation?',
+                nextStage: 'offer_soothing',
+                soothing: null,
+            };
+        }
+        if (wantsChat(text)) {
+            return {
+                reply: 'Great. Tell me what is on your mind and I will stay with you.',
+                nextStage: 'chatting',
+                soothing: null,
+            };
+        }
+        if (wantsSoothing(text)) {
+            return {
+                reply: 'Would you like soothing music with guided meditation, or without guided meditation?',
+                nextStage: 'offer_soothing',
+                soothing: null,
+            };
+        }
+        return {
+            reply: 'You can chat with me, or choose soothing music with or without guided meditation.',
+            nextStage: 'what_want',
+            soothing: null,
+        };
+    }
+
+    if (stage === 'support_choice') {
+        if (wantsSoothing(text)) {
+            return {
+                reply: 'Would you like soothing music with guided meditation, or without guided meditation?',
+                nextStage: 'offer_soothing',
+                soothing: null,
+            };
+        }
+        if (wantsChat(text)) {
+            return {
+                reply: 'Okay. I’m listening. Tell me what feels heaviest right now.',
+                nextStage: 'chatting',
+                soothing: null,
+            };
+        }
+        return {
+            reply: 'I can keep chatting with you, or we can switch to soothing music. Which one feels better?',
+            nextStage: 'support_choice',
+            soothing: null,
+        };
+    }
+
+    if (stage === 'offer_soothing') {
+        if (withGuided(text)) {
+            return {
+                reply: 'I can start soothing music with guided meditation now.',
+                nextStage: 'offer_soothing',
+                soothing: 'guided',
+            };
+        }
+        if (withoutGuided(text)) {
+            return {
+                reply: 'I can start soothing music without guided meditation now.',
+                nextStage: 'offer_soothing',
+                soothing: 'ambient',
+            };
+        }
+        return {
+            reply: 'Choose one: with guided meditation, or without guided meditation.',
+            nextStage: 'offer_soothing',
+            soothing: null,
+        };
+    }
+
+    return {
+        reply: 'I’m here with you. Keep going at your pace.',
+        nextStage: stage,
+        soothing: null,
+    };
+}
+
+export default function ChatPage({ forceMode = null }) {
     const { scoreModel, interventionPlan, ensembleDecision, prediction } = useGlobalState();
-    const [messages, setMessages] = useState([
-        { id: 1, text: 'Hey, I’m here. Want to name your mood in one sentence?', sender: 'bot' },
-    ]);
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const modeFromQuery = searchParams.get('mode');
+    const isAppInitiated = forceMode === 'app' || modeFromQuery === 'app';
+    const initialText = isAppInitiated
+        ? 'Hi, I wanted to check in. Are you feeling okay right now?'
+        : 'Hey, I’m here. Want to name your mood in one sentence?';
+
+    const [messages, setMessages] = useState(() => [{ id: Date.now(), text: initialText, sender: 'bot' }]);
     const [engagementState, setEngagementState] = useState(() => loadEngagementState());
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [liveTranscript, setLiveTranscript] = useState('');
     const [speechError, setSpeechError] = useState('');
+    const [appStage, setAppStage] = useState(isAppInitiated ? 'check_okay' : 'standard');
+    const [suggestedSoothing, setSuggestedSoothing] = useState(null);
+
     const messagesEndRef = useRef(null);
     const recognitionRef = useRef(null);
     const messagesRef = useRef(messages);
@@ -26,7 +175,7 @@ export default function ChatPage() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, isTyping, liveTranscript]);
 
-    const buildReply = useCallback((text) => {
+    const buildDefaultReply = useCallback((text) => {
         const lowered = text.toLowerCase();
         if (lowered.includes('stressed') || lowered.includes('tired')) {
             return 'That sounds heavy. Try loosening your shoulders and taking three slow breaths with me.';
@@ -54,14 +203,29 @@ export default function ChatPage() {
         setEngagementState(recordCheckIn());
         setIsTyping(true);
 
+        let replyText = '';
+        let nextStage = appStage;
+        let soothingChoice = null;
+
+        if (isAppInitiated) {
+            const result = appFlowReply(text, appStage);
+            replyText = result.reply;
+            nextStage = result.nextStage;
+            soothingChoice = result.soothing;
+        } else {
+            replyText = buildDefaultReply(text);
+        }
+
         setTimeout(() => {
-            const botMessage = { id: Date.now() + Math.random(), text: buildReply(text), sender: 'bot' };
+            const botMessage = { id: Date.now() + Math.random(), text: replyText, sender: 'bot' };
             setMessages((prev) => {
                 const merged = [...prev, botMessage];
                 messagesRef.current = merged;
                 return merged;
             });
             setIsTyping(false);
+            setAppStage(nextStage);
+            setSuggestedSoothing(soothingChoice);
         }, 980);
 
         try {
@@ -85,7 +249,7 @@ export default function ChatPage() {
         } catch (error) {
             console.error('Failed to score model:', error);
         }
-    }, [buildReply, scoreModel]);
+    }, [appStage, buildDefaultReply, isAppInitiated, scoreModel]);
 
     const setupRecognition = useCallback(() => {
         if (typeof window === 'undefined') return null;
@@ -176,9 +340,11 @@ export default function ChatPage() {
     return (
         <div className="screen-wrap animate-fade-in" style={{ maxWidth: '860px' }}>
             <div className="card" style={{ marginBottom: '12px' }}>
-                <h1 className="display" style={{ fontSize: '30px', marginBottom: '8px' }}>Talk</h1>
+                <h1 className="display" style={{ fontSize: '30px', marginBottom: '8px' }}>
+                    {isAppInitiated ? 'Proactive Check-in' : 'Talk'}
+                </h1>
                 <p className="text-muted" style={{ margin: 0 }}>
-                    Type or use voice. Streak: {streak}d.
+                    {isAppInitiated ? 'App-initiated conversation.' : 'Type or use voice.'} Streak: {streak}d.
                 </p>
             </div>
 
@@ -236,6 +402,17 @@ export default function ChatPage() {
                     <Send size={17} />
                 </button>
             </form>
+
+            {isAppInitiated && suggestedSoothing && (
+                <div className="card" style={{ marginTop: '12px' }}>
+                    <p className="text-muted" style={{ marginTop: 0, marginBottom: '10px' }}>
+                        Ready to switch to soothing audio {suggestedSoothing === 'guided' ? 'with guided meditation' : 'without guided meditation'}.
+                    </p>
+                    <button className="btn-primary" onClick={() => navigate(`/?soothing=${suggestedSoothing}`)}>
+                        Open soothing audio
+                    </button>
+                </div>
+            )}
 
             {speechError && (
                 <p className="text-muted" style={{ marginTop: '10px', marginBottom: 0, fontSize: '13px' }}>
