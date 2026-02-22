@@ -1,65 +1,34 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { Home, BarChart2, MessageCircle, Activity, ShieldAlert, Globe2, Sparkles } from 'lucide-react';
+import { Home, MessageCircle, ShieldCheck, Sparkles } from 'lucide-react';
 
 export default function Layout() {
     const navItems = [
-        { name: 'Home', path: '/', icon: Home },
-        { name: 'Chat', path: '/chat', icon: MessageCircle },
-        { name: 'Data', path: '/data', icon: Activity },
-        { name: 'Safety', path: '/safety', icon: ShieldAlert },
-        { name: 'Impact', path: '/impact', icon: Globe2 },
-        { name: 'Viz', path: '/viz-lab', icon: Sparkles },
-        { name: 'Stats', path: '/stats', icon: BarChart2 },
+        { name: 'Today', path: '/', icon: Home },
+        { name: 'Talk', path: '/chat', icon: MessageCircle },
+        { name: 'Care', path: '/safety', icon: ShieldCheck },
+        { name: 'Story', path: '/stats', icon: Sparkles },
     ];
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg)' }}>
-            {/* Main Content Area */}
-            <main style={{ flex: 1, paddingBottom: '80px', overflowY: 'auto' }}>
+        <div className="app-shell">
+            <div className="top-ribbon">
+                <div className="brand-mark">MindTrace</div>
+                <div className="chip">User Companion Mode</div>
+            </div>
+
+            <main style={{ minHeight: '100vh' }}>
                 <Outlet />
             </main>
 
-            {/* Bottom Navigation for Mobile / Fixed Bottom Nav */}
-            <nav style={{
-                position: 'fixed',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                background: 'var(--color-bg-card)',
-                borderTop: '1px solid var(--color-border)',
-                display: 'flex',
-                justifyContent: 'space-around',
-                padding: '12px 0 calc(12px + env(safe-area-inset-bottom))',
-                boxShadow: '0 -4px 20px rgba(42, 60, 79, 0.04)',
-                zIndex: 50
-            }}>
+            <nav className="dock-nav">
                 {navItems.map((item) => (
                     <NavLink
                         key={item.path}
                         to={item.path}
-                        style={({ isActive }) => ({
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '4px',
-                            textDecoration: 'none',
-                            color: isActive ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                            transform: isActive ? 'translateY(-2px)' : 'none',
-                            transition: 'all 0.2s ease',
-                        })}
+                        className={({ isActive }) => `dock-link${isActive ? ' active' : ''}`}
                     >
-                        {({ isActive }) => (
-                            <>
-                                <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-                                <span style={{
-                                    fontSize: '11px',
-                                    fontWeight: isActive ? 600 : 500,
-                                    transition: 'font-weight 0.2s'
-                                }}>
-                                    {item.name}
-                                </span>
-                            </>
-                        )}
+                        <item.icon size={20} />
+                        <span>{item.name}</span>
                     </NavLink>
                 ))}
             </nav>

@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Send, Sparkles, ShieldAlert } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGlobalState } from '../GlobalStateProvider';
 import { calculateStreak, getNudgeForRiskTier, loadEngagementState, recordCheckIn } from '../growth/engagementEngine';
@@ -7,19 +7,19 @@ import { calculateStreak, getNudgeForRiskTier, loadEngagementState, recordCheckI
 export default function ChatPage() {
     const { scoreModel, interventionPlan, ensembleDecision, prediction } = useGlobalState();
     const [messages, setMessages] = useState([
-        { id: 1, text: "Hi there. I'm here if you want to reflect on your day or just take a breather. How are you feeling right now?", sender: 'bot' }
+        { id: 1, text: "Hey, I’m here. Want to name your mood in one sentence?", sender: 'bot' }
     ]);
     const [engagementState, setEngagementState] = useState(() => loadEngagementState());
     const [input, setInput] = useState('');
+    const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef(null);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
+    const tier = interventionPlan?.tier ?? ensembleDecision?.tier ?? prediction?.risk_tier ?? 0;
+    const streak = useMemo(() => calculateStreak(engagementState.checkInDays), [engagementState.checkInDays]);
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages, isTyping]);
 
     const handleSend = async (e) => {
         e.preventDefault();
@@ -30,148 +30,127 @@ export default function ChatPage() {
         setMessages(updatedMessages);
         setInput('');
         setEngagementState(recordCheckIn());
-
-        const tier = interventionPlan?.tier ?? ensembleDecision?.tier ?? prediction?.risk_tier ?? 0;
+        setIsTyping(true);
 
         setTimeout(() => {
-            let reply = "I hear you. Taking a moment to acknowledge that is a great first step.";
+            let reply = "I’m with you. Let’s take this one breath at a time.";
             if (input.toLowerCase().includes('stressed') || input.toLowerCase().includes('tired')) {
-                reply = "It sounds like you've had a lot on your plate. Maybe a short breathing exercise could help settle your mind when you're ready.";
+                reply = "That sounds heavy. Try loosening your shoulders and taking three slow breaths with me.";
             } else if (input.toLowerCase().includes('good') || input.toLowerCase().includes('great')) {
-                reply = "That's wonderful to hear. Holding onto that positive energy can really carry you through the rest of the week.";
+                reply = "Love that. Let’s lock in this momentum with one small win before tonight.";
             } else if (tier >= 2) {
-                reply = "Thank you for sharing that. I strongly recommend opening the Safety Protocol now so we can connect you with immediate support resources.";
+                reply = "Thanks for sharing honestly. I want you to open your Care page now so we can bring in support quickly.";
             } else if (tier === 1) {
-                reply = "I notice elevated stress trends. A short walk, hydration, and one trusted check-in could help stabilize your day.";
+                reply = "I’m seeing elevated pressure patterns. A short walk and one trusted check-in can help shift this.";
             }
             setMessages((prev) => [...prev, { id: Date.now() + 1, text: reply, sender: 'bot' }]);
-        }, 1200);
+            setIsTyping(false);
+        }, 980);
 
         try {
-            const last20 = updatedMessages.slice(-20).map((m) => m.text).join(" ");
+            const last20 = updatedMessages.slice(-20).map((m) => m.text).join(' ');
             const databricksResponse = await scoreModel([last20]);
-
-            if (databricksResponse && databricksResponse.predictions && databricksResponse.predictions.length > 0) {
+            if (databricksResponse?.predictions?.length) {
                 const nlpPrediction = databricksResponse.predictions[0];
                 if (nlpPrediction.risk_tier > 0) {
                     setMessages((prev) => [...prev, {
                         id: Date.now() + 2,
-                        text: `[Internal Tracker]: Model predicted ${nlpPrediction.predicted_class} with confidence ${(nlpPrediction.confidence * 100).toFixed(1)}%`,
+                        text: `Signal note: ${nlpPrediction.predicted_class} (${(nlpPrediction.confidence * 100).toFixed(1)}%)`,
                         sender: 'system'
                     }]);
                 }
             }
-        } catch (e) {
-            console.error("Failed to score model:", e);
+        } catch (error) {
+            console.error('Failed to score model:', error);
         }
     };
 
-    const tier = interventionPlan?.tier ?? ensembleDecision?.tier ?? prediction?.risk_tier ?? 0;
-    const streak = calculateStreak(engagementState.checkInDays);
-
     return (
-        <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)', maxWidth: '600px', margin: '0 auto' }}>
-            <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Sparkles size={20} color="var(--color-primary)" />
-                <h2 style={{ fontSize: '18px', margin: 0, fontWeight: 600 }}>Mindful Companion</h2>
-            </div>
-
-            <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{
-                    border: '1px solid var(--color-border)',
-                    borderRadius: '12px',
-                    background: '#fff',
-                    padding: '10px 12px',
-                    fontSize: '13px',
-                    lineHeight: 1.4,
-                    color: 'var(--color-text-muted)'
-                }}>
-                    Streak: <strong style={{ color: 'var(--color-text-main)' }}>{streak} days</strong> · {getNudgeForRiskTier(tier, streak)}
+        <div className="screen-wrap animate-fade-in" style={{ maxWidth: '760px' }}>
+            <div
+                className="card"
+                style={{
+                    marginBottom: '12px',
+                    background: 'linear-gradient(132deg, rgba(10,143,123,0.18) 0%, rgba(255,208,95,0.24) 54%, rgba(255,95,46,0.2) 100%)',
+                }}
+            >
+                <h1 className="display" style={{ fontSize: '30px', marginBottom: '8px' }}>Talk it out, live.</h1>
+                <p className="text-muted" style={{ marginTop: 0, marginBottom: '10px' }}>
+                    This space is for real words, not polished answers.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    <div className="chip"><Sparkles size={13} /> Streak {streak}d</div>
+                    <div className="chip">{getNudgeForRiskTier(tier, streak)}</div>
                 </div>
+            </div>
 
-                {tier >= 1 && (
-                    <div style={{
-                        border: '1px solid #f1d8c2',
-                        background: '#fff8f2',
-                        borderRadius: '12px',
-                        padding: '12px',
-                        fontSize: '13px',
-                        color: '#7b4a1e'
-                    }}>
-                        Elevated risk detected from passive signals.
-                        <Link to="/safety" style={{ color: '#b85e1f', marginLeft: '6px', textDecoration: 'underline' }}>
-                            Open safety protocol
-                        </Link>
+            {tier >= 1 && (
+                <div className="card" style={{ marginBottom: '12px', border: '1px solid rgba(255,95,46,0.28)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#cb4e1e' }}>
+                        <ShieldAlert size={14} />
+                        Elevated pressure pattern detected
                     </div>
-                )}
+                    <p className="text-muted" style={{ marginBottom: 0 }}>
+                        You can open your care settings anytime.
+                        <Link to="/safety" style={{ marginLeft: '6px', color: '#cb4e1e', textDecoration: 'underline' }}>Open Care page</Link>
+                    </p>
+                </div>
+            )}
 
-                {messages.map((msg) => (
-                    <div key={msg.id} style={{
-                        alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
-                        maxWidth: '85%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                    }}>
-                        <div style={{
-                            background: msg.sender === 'user' ? 'var(--color-primary)' : msg.sender === 'system' ? '#fde0df' : 'var(--color-bg-card)',
-                            color: msg.sender === 'user' ? 'white' : msg.sender === 'system' ? '#c0392b' : 'var(--color-text-main)',
-                            padding: msg.sender === 'system' ? '8px 12px' : '14px 18px',
-                            borderRadius: msg.sender === 'user' ? '20px 20px 4px 20px' : msg.sender === 'system' ? '8px' : '20px 20px 20px 4px',
-                            boxShadow: msg.sender === 'bot' ? '0 2px 10px rgba(42, 60, 79, 0.04)' : 'none',
-                            border: msg.sender === 'bot' ? '1px solid var(--color-border)' : 'none',
-                            fontSize: msg.sender === 'system' ? '12px' : '15px',
-                            fontFamily: msg.sender === 'system' ? 'monospace' : 'inherit',
-                            lineHeight: 1.5,
-                        }}>
-                            {msg.text}
+            <div className="card" style={{ padding: '12px', marginBottom: '12px' }}>
+                <div style={{ maxHeight: '50vh', overflowY: 'auto', padding: '6px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {messages.map((msg) => (
+                        <div key={msg.id} style={{ alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '82%' }}>
+                            <div
+                                style={{
+                                    padding: msg.sender === 'system' ? '7px 10px' : '12px 14px',
+                                    borderRadius: msg.sender === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                                    background:
+                                        msg.sender === 'user'
+                                            ? 'linear-gradient(135deg, #ff5f2e, #ff7d22)'
+                                            : msg.sender === 'system'
+                                                ? '#fff0ea'
+                                                : 'rgba(255,255,255,0.8)',
+                                    border: msg.sender === 'user' ? 'none' : '1px solid var(--color-border)',
+                                    color: msg.sender === 'user' ? 'white' : msg.sender === 'system' ? '#b2461f' : 'var(--color-ink)',
+                                    fontSize: msg.sender === 'system' ? '12px' : '15px',
+                                    lineHeight: 1.4,
+                                }}
+                            >
+                                {msg.text}
+                            </div>
                         </div>
-                        {msg.sender === 'bot' && (
-                            <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginTop: '4px', marginLeft: '4px' }}>MindTrace Bot</span>
-                        )}
-                    </div>
-                ))}
-                <div ref={messagesEndRef} />
+                    ))}
+
+                    {isTyping && (
+                        <div style={{ alignSelf: 'flex-start' }}>
+                            <div className="chip">typing...</div>
+                        </div>
+                    )}
+                    <div ref={messagesEndRef} />
+                </div>
             </div>
 
-            <div style={{ padding: '16px 24px 24px', background: 'var(--color-bg)' }}>
-                <form onSubmit={handleSend} style={{ display: 'flex', gap: '10px' }}>
-                    <input
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        placeholder="Type your thoughts..."
-                        style={{
-                            flex: 1,
-                            padding: '14px 20px',
-                            borderRadius: '30px',
-                            border: '1px solid var(--color-border)',
-                            outline: 'none',
-                            fontSize: '15px',
-                            background: 'white',
-                            fontFamily: 'var(--font-sans)',
-                        }}
-                    />
-                    <button type="submit" style={{
-                        background: 'var(--color-secondary)',
-                        color: 'var(--color-text-main)',
-                        border: 'none',
-                        borderRadius: '50%',
-                        width: '48px',
-                        height: '48px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        transition: 'transform 0.2s',
+            <form onSubmit={handleSend} className="card" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Drop your thoughts here..."
+                    style={{
+                        flex: 1,
+                        border: '1px solid var(--color-border)',
+                        borderRadius: '999px',
+                        padding: '12px 16px',
+                        outline: 'none',
+                        fontSize: '15px',
+                        fontFamily: 'var(--font-sans)',
                     }}
-                        onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.95)'; }}
-                        onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-                    >
-                        <Send size={20} />
-                    </button>
-                </form>
-            </div>
+                />
+                <button type="submit" className="btn-primary" style={{ width: 46, height: 46, borderRadius: '50%', padding: 0 }}>
+                    <Send size={17} />
+                </button>
+            </form>
         </div>
     );
 }

@@ -12,13 +12,13 @@ export default function SafetyPage() {
         <div className="animate-fade-in" style={{ padding: '24px', maxWidth: '720px', margin: '0 auto 80px' }}>
             <header style={{ marginBottom: '20px' }}>
                 <h2 style={{ margin: 0, fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-primary)' }}>
-                    Safety Escalation
+                    Care Circle
                 </h2>
                 <h1 className="display" style={{ margin: '10px 0 8px', fontSize: '32px' }}>
-                    Risk Protocol Center
+                    Your Support Plan
                 </h1>
                 <p style={{ margin: 0, color: 'var(--color-text-muted)', lineHeight: 1.5 }}>
-                    Transparent decisioning layer for interventions. This app is not a diagnosis tool and should not replace licensed care.
+                    Keep trusted people and emergency paths ready, so asking for help is one tap away.
                 </p>
             </header>
 

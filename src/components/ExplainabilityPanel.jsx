@@ -9,10 +9,10 @@ export default function ExplainabilityPanel() {
     }));
 
     return (
-        <section className="card" style={{ margin: '0 24px 24px' }}>
-            <h3 style={{ marginTop: 0, marginBottom: '8px' }}>Why This Risk Tier?</h3>
+        <section className="card" style={{ margin: '0 0 24px' }}>
+            <h3 style={{ marginTop: 0, marginBottom: '8px' }}>Signals Behind Your Week</h3>
             <p style={{ marginTop: 0, color: 'var(--color-text-muted)', fontSize: '14px' }}>
-                Explainability view for judges: model output + top contributing digital biomarkers.
+                A plain-language breakdown of which patterns shaped your current support level.
             </p>
 
             <div style={{
