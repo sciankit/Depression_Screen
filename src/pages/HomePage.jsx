@@ -1,73 +1,56 @@
 import { useMemo, useRef, useState } from 'react';
 import {
-    Activity,
-    Flame,
-    HeartPulse,
+    ArrowRight,
+    CalendarClock,
+    CheckCircle2,
     Loader,
     MessageCircle,
-    Orbit,
     PhoneCall,
     PlayCircle,
     ShieldAlert,
-    Sparkles,
     Square,
+    Sparkles,
+    Target,
+    TimerReset,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useGlobalState } from '../GlobalStateProvider';
 import { RISK_TIERS } from '../riskUtils';
-import { calculateStreak, getNudgeForRiskTier, loadEngagementState } from '../growth/engagementEngine';
+import { calculateStreak, loadEngagementState } from '../growth/engagementEngine';
 
 const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICE_ID = import.meta.env.VITE_ELEVENLABS_VOICE_ID;
 
-const QUICK_ACTIONS = [
-    { label: 'Talk', route: '/chat' },
-    { label: 'Plan', route: '/plan' },
-    { label: 'Care', route: '/safety' },
-    { label: 'Story', route: '/stats' },
-    { label: 'Action Plan', route: '/plan' },
+const TODAY_TASKS = [
+    {
+        title: '2-minute emotional check-in',
+        detail: 'Name your current mood and get an adjusted response.',
+        route: '/chat',
+        icon: MessageCircle,
+    },
+    {
+        title: 'Adaptive plan refresh',
+        detail: 'Run a short branching check-in for today\'s plan.',
+        route: '/plan',
+        icon: Target,
+    },
+    {
+        title: 'Care circle quick review',
+        detail: 'Verify support contacts and escalation settings.',
+        route: '/safety',
+        icon: ShieldAlert,
+    },
 ];
 
-function clamp(value, min = 0, max = 100) {
-    return Math.max(min, Math.min(max, value));
-}
-
-function buildSignalModel(riskTier, streak) {
-    const sleep = clamp(80 - riskTier * 20 + streak * 2);
-    const stress = clamp(30 + riskTier * 25 - streak * 2);
-    const social = clamp(65 - riskTier * 12 + streak * 3);
-    const readiness = clamp(Math.round((sleep + (100 - stress) + social) / 3));
-
-    return { sleep, stress, social, readiness };
-}
-
-function HeroGraphic() {
-    return (
-        <div className="home-pro-art" aria-hidden="true">
-            <svg viewBox="0 0 320 240" role="presentation">
-                <defs>
-                    <linearGradient id="heroStroke" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="rgba(255,255,255,0.95)" />
-                        <stop offset="100%" stopColor="rgba(255,255,255,0.45)" />
-                    </linearGradient>
-                    <linearGradient id="heroFill" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="rgba(255,255,255,0.26)" />
-                        <stop offset="100%" stopColor="rgba(255,255,255,0.06)" />
-                    </linearGradient>
-                </defs>
-
-                <rect x="18" y="24" width="284" height="190" rx="28" fill="url(#heroFill)" stroke="url(#heroStroke)" />
-                <circle cx="72" cy="88" r="27" fill="rgba(255,255,255,0.22)" />
-                <path d="M55 89h34" stroke="rgba(255,255,255,0.7)" strokeWidth="4" strokeLinecap="round" />
-                <path d="M72 72v34" stroke="rgba(255,255,255,0.7)" strokeWidth="4" strokeLinecap="round" />
-
-                <path d="M116 147c14-23 25-6 35-21 9-14 20 7 32-10 10-15 18 7 36-13" stroke="rgba(255,255,255,0.78)" strokeWidth="4" fill="none" strokeLinecap="round" />
-                <path d="M118 172h118" stroke="rgba(255,255,255,0.42)" strokeWidth="4" strokeLinecap="round" />
-                <path d="M118 188h88" stroke="rgba(255,255,255,0.3)" strokeWidth="4" strokeLinecap="round" />
-            </svg>
-        </div>
-    );
-}
+const WEEKLY_STEPS = [
+    { day: 'Mon', done: true },
+    { day: 'Tue', done: true },
+    { day: 'Wed', done: false },
+    { day: 'Thu', done: false },
+    { day: 'Fri', done: false },
+    { day: 'Sat', done: false },
+    { day: 'Sun', done: false },
+];
 
 export default function HomePage() {
     const navigate = useNavigate();
@@ -79,25 +62,12 @@ export default function HomePage() {
     const streak = calculateStreak(engagement.checkInDays);
     const riskTier = interventionPlan?.tier ?? ensembleDecision?.tier ?? prediction?.risk_tier ?? 0;
     const riskMeta = RISK_TIERS[riskTier] || RISK_TIERS[0];
-    const nudge = getNudgeForRiskTier(riskTier, streak);
-    const signals = useMemo(() => buildSignalModel(riskTier, streak), [riskTier, streak]);
 
-    const momentum = useMemo(() => {
-        if (riskTier >= 2) return 'Stabilize';
-        if (riskTier === 1) return 'Recover';
-        return 'Maintain';
-    }, [riskTier]);
-
-    const todayPlan = useMemo(() => {
-        if (interventionPlan?.interventions?.length) {
-            return interventionPlan.interventions.slice(0, 3);
-        }
-        return [
-            '2-minute check-in',
-            'Adaptive plan refresh',
-            'Open care settings once',
-        ];
-    }, [interventionPlan]);
+    const completedTasks = useMemo(() => {
+        if (streak >= 5) return 2;
+        if (streak >= 2) return 1;
+        return 0;
+    }, [streak]);
 
     const playPrompt = async () => {
         if (status === 'loading' || status === 'playing') return;
@@ -164,96 +134,155 @@ export default function HomePage() {
                     : 'Try again';
 
     return (
-        <div className="screen-wrap home-simplified-wrap animate-fade-in">
-            <section className="card home-pro-hero reveal-1">
-                <div className="home-pro-content">
-                    <div className="chip home-pro-chip">
-                        <span style={{ width: 8, height: 8, borderRadius: 99, background: riskMeta.color }} />
-                        {riskMeta.label} support
-                    </div>
-
-                    <h1 className="display home-pro-title">Daily Check-in</h1>
-                    <p className="home-pro-subtitle">Take 2 minutes to talk with your mindful companion about your day.</p>
-
-                    <div className="home-pro-actions">
-                        <button className="home-pro-btn" onClick={() => navigate('/chat')}>
-                            <MessageCircle size={14} /> Text Chat
-                        </button>
-                        <button className="home-pro-btn" onClick={() => navigate('/chat')}>
-                            <PhoneCall size={14} /> Voice Call
-                        </button>
-                        <button className="home-pro-btn home-pro-btn-solid" onClick={status === 'playing' ? stopPrompt : playPrompt} disabled={isScoring}>
-                            {isScoring && <Loader size={14} className="animate-spin" />}
-                            {!isScoring && status === 'idle' && <PlayCircle size={14} />}
-                            {!isScoring && status === 'loading' && <Loader size={14} className="animate-spin" />}
-                            {!isScoring && status === 'playing' && <Square size={12} fill="currentColor" />}
-                            {listenLabel}
-                        </button>
-                    </div>
+        <div className="screen-wrap animate-fade-in" style={{ maxWidth: '860px' }}>
+            <section className="card home-daily-card" style={{ marginBottom: '12px' }}>
+                <div className="chip home-daily-chip">
+                    <span style={{ width: 8, height: 8, borderRadius: 99, background: riskMeta.color }} />
+                    {riskMeta.label} support
                 </div>
+                <h1 className="display home-daily-title">Daily Check-in</h1>
+                <p className="home-daily-subtitle">Take 2 minutes to talk with your mindful companion about your day.</p>
 
-                <HeroGraphic />
+                <div className="home-daily-actions">
+                    <button className="home-daily-btn" onClick={() => navigate('/chat')}>
+                        <MessageCircle size={14} /> Text Chat
+                    </button>
+                    <button className="home-daily-btn" onClick={() => navigate('/chat')}>
+                        <PhoneCall size={14} /> Voice Call
+                    </button>
+                    <button className="home-daily-btn home-daily-btn-solid" onClick={status === 'playing' ? stopPrompt : playPrompt} disabled={isScoring}>
+                        {isScoring && <Loader size={14} className="animate-spin" />}
+                        {!isScoring && status === 'idle' && <PlayCircle size={14} />}
+                        {!isScoring && status === 'loading' && <Loader size={14} className="animate-spin" />}
+                        {!isScoring && status === 'playing' && <Square size={12} fill="currentColor" />}
+                        {listenLabel}
+                    </button>
+                </div>
             </section>
 
-            <section className="home-signal-grid reveal-2">
-                <div className="card home-signal-card">
-                    <div className="home-signal-ring" style={{ '--ring': `${signals.readiness * 3.6}deg` }}>
-                        <div className="home-signal-ring-inner">
-                            <div className="home-mini-label">Readiness</div>
-                            <div className="home-ring-value">{signals.readiness}</div>
-                        </div>
-                    </div>
-                    <div className="home-mini-bars">
-                        <div className="home-bar-row">
-                            <span>Sleep</span>
-                            <div className="home-bar-track"><div className="home-bar-fill" style={{ width: `${signals.sleep}%` }} /></div>
-                        </div>
-                        <div className="home-bar-row">
-                            <span>Stress</span>
-                            <div className="home-bar-track"><div className="home-bar-fill stress" style={{ width: `${signals.stress}%` }} /></div>
-                        </div>
-                        <div className="home-bar-row">
-                            <span>Social</span>
-                            <div className="home-bar-track"><div className="home-bar-fill" style={{ width: `${signals.social}%` }} /></div>
-                        </div>
-                    </div>
+            <section className="home-glance-grid" style={{ marginBottom: '12px' }}>
+                <div className="card home-glance-card">
+                    <div className="home-mini-label">Today Completion</div>
+                    <div className="home-metric">{completedTasks}/3</div>
+                    <p className="text-muted" style={{ margin: 0, fontSize: '13px' }}>
+                        Finish your daily trio to keep momentum stable.
+                    </p>
                 </div>
+                <div className="card home-glance-card">
+                    <div className="home-mini-label">Support Response Window</div>
+                    <div className="home-metric">&lt; 6 min</div>
+                    <p className="text-muted" style={{ margin: 0, fontSize: '13px' }}>
+                        Safety and care actions are prioritized in-app.
+                    </p>
+                </div>
+                <div className="card home-glance-card">
+                    <div className="home-mini-label">Next Reset Slot</div>
+                    <div className="home-metric">8:30 PM</div>
+                    <p className="text-muted" style={{ margin: 0, fontSize: '13px' }}>
+                        Suggested 6-minute wind-down routine.
+                    </p>
+                </div>
+            </section>
 
-                <div className="card home-plan-card">
-                    <div className="home-mini-label" style={{ marginBottom: 8 }}>Today Stats</div>
-                    <div className="home-stats-row">
-                        <div className="home-stat-pill"><Orbit size={13} /> {streak}d streak</div>
-                        <div className="home-stat-pill"><Flame size={13} /> {momentum}</div>
-                    </div>
-                    <div className="home-stats-row" style={{ marginBottom: 10 }}>
-                        <div className="home-stat-pill"><ShieldAlert size={13} /> {riskMeta.label}</div>
-                        <div className="home-stat-pill"><HeartPulse size={13} /> {nudge}</div>
-                    </div>
-                    <div style={{ display: 'grid', gap: 8 }}>
-                        {todayPlan.map((item, idx) => (
-                            <div key={item} className="home-plan-item">
-                                <span>{idx + 1}</span>
-                                <p>{item}</p>
-                            </div>
+            <section className="home-two-col" style={{ marginBottom: '12px' }}>
+                <div className="card">
+                    <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>Your next best actions</h3>
+                    <p className="text-muted" style={{ marginTop: 0, marginBottom: '10px', fontSize: '14px' }}>
+                        Ordered by impact on your current risk profile.
+                    </p>
+
+                    <div style={{ display: 'grid', gap: '8px' }}>
+                        {TODAY_TASKS.map((task, idx) => (
+                            <button key={task.title} onClick={() => navigate(task.route)} className="home-task-btn">
+                                <div className="home-task-index">{idx + 1}</div>
+                                <div style={{ textAlign: 'left' }}>
+                                    <div style={{ fontWeight: 700, fontSize: '14px' }}>{task.title}</div>
+                                    <div className="text-muted" style={{ fontSize: '13px' }}>{task.detail}</div>
+                                </div>
+                                <task.icon size={16} />
+                            </button>
                         ))}
                     </div>
                 </div>
+
+                <div className="card">
+                    <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>Weekly focus track</h3>
+                    <p className="text-muted" style={{ marginTop: 0, marginBottom: '10px', fontSize: '14px' }}>
+                        A simple scoreboard to keep consistency visible.
+                    </p>
+
+                    <div className="home-week-strip" style={{ marginBottom: '10px' }}>
+                        {WEEKLY_STEPS.map((item) => (
+                            <div key={item.day} className={`home-week-day${item.done ? ' done' : ''}`}>
+                                <span>{item.day}</span>
+                                {item.done ? <CheckCircle2 size={13} /> : <TimerReset size={13} />}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="home-safety-box">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                            <CalendarClock size={15} color={riskMeta.color} />
+                            <strong>Safety readiness</strong>
+                        </div>
+                        <p className="text-muted" style={{ margin: 0, fontSize: '13px' }}>
+                            {riskTier >= 2
+                                ? 'High-support mode active. Keep your care circle and urgent resources one tap away.'
+                                : 'Your care settings are configured. Review them once this week for faster support if needed.'}
+                        </p>
+                        <button className="chip" style={{ marginTop: '8px' }} onClick={() => navigate('/safety')}>
+                            Open care settings <ArrowRight size={12} />
+                        </button>
+                    </div>
+                </div>
             </section>
 
-            <section className="home-action-rail reveal-3">
-                {QUICK_ACTIONS.map((item, index) => (
-                    <button
-                        key={item.label}
-                        className="home-action-pill"
-                        onClick={() => navigate(item.route)}
-                        style={{ animationDelay: `${index * 80}ms` }}
-                    >
-                        <Sparkles size={12} />
-                        {item.label}
-                    </button>
-                ))}
-                <button className="home-action-pill" onClick={() => navigate('/plan')}>
-                    <Activity size={12} /> Action Plan
+            <section className="home-quick-grid">
+                <button
+                    className="card"
+                    onClick={() => navigate('/chat')}
+                    style={{ textAlign: 'left', cursor: 'pointer', border: '1px solid rgba(10,143,123,0.25)' }}
+                >
+                    <div className="chip" style={{ width: 'fit-content', marginBottom: '8px', color: 'var(--color-accent)' }}>
+                        Talk
+                    </div>
+                    <h3 style={{ fontSize: '21px', marginBottom: '6px' }}>2-minute mood check</h3>
+                    <p className="text-muted" style={{ margin: 0, fontSize: '14px' }}>
+                        Vent, reflect, reset. Your assistant adapts to how your day feels.
+                    </p>
+                </button>
+
+                <button
+                    className="card"
+                    onClick={() => navigate('/plan')}
+                    style={{ textAlign: 'left', cursor: 'pointer', border: '1px solid rgba(255,95,46,0.24)' }}
+                >
+                    <div className="chip" style={{ width: 'fit-content', marginBottom: '8px', color: 'var(--color-primary)' }}>
+                        Plan
+                    </div>
+                    <h3 style={{ fontSize: '21px', marginBottom: '6px' }}>Adaptive daily plan</h3>
+                    <p className="text-muted" style={{ margin: 0, fontSize: '14px' }}>
+                        Personalized interventions based on your latest check-in and trend.
+                    </p>
+                </button>
+
+                <button
+                    className="card"
+                    onClick={() => navigate('/stats')}
+                    style={{
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        border: '1px solid rgba(255,208,95,0.34)',
+                        background: 'linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,240,211,0.72))',
+                    }}
+                >
+                    <div className="chip" style={{ width: 'fit-content', marginBottom: '8px' }}>
+                        Story
+                    </div>
+                    <h3 style={{ fontSize: '21px', marginBottom: '6px' }}>Your weekly vibe arc</h3>
+                    <p className="text-muted" style={{ margin: 0, fontSize: '14px' }}>
+                        See your patterns as a personal story, not a clinical dashboard.
+                    </p>
                 </button>
             </section>
         </div>
