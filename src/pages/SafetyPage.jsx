@@ -1,6 +1,7 @@
 import { AlertTriangle, ShieldCheck, PhoneCall, ArrowUpRight } from 'lucide-react';
 import { useGlobalState } from '../GlobalStateProvider';
 import { CRISIS_RESOURCES, RISK_TIERS } from '../riskUtils';
+import SafetyEscalationConsole from '../components/SafetyEscalationConsole';
 
 export default function SafetyPage() {
     const { interventionPlan, ensembleDecision, isScoring } = useGlobalState();
@@ -85,6 +86,8 @@ export default function SafetyPage() {
                     ))}
                 </div>
             </section>
+
+            <SafetyEscalationConsole tier={tier} />
         </div>
     );
 }
