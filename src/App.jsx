@@ -8,6 +8,7 @@ import SafetyPage from './pages/SafetyPage';
 import ImpactPage from './pages/ImpactPage';
 import VizLabPage from './pages/VizLabPage';
 import PlanPage from './pages/PlanPage';
+import DevDashboardPage from './pages/DevDashboardPage';
 import { GlobalStateProvider } from './GlobalStateProvider';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
             <Route path="impact" element={<ImpactPage />} />
             <Route path="viz-lab" element={<VizLabPage />} />
             <Route path="plan" element={<PlanPage />} />
+            <Route path="dev" element={<DevDashboardPage />} />
           </Route>
         </Routes>
       </Router>
