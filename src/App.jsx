@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import StatsPage from './pages/StatsPage';
 import ChatPage from './pages/ChatPage';
 import CollectorPage from './pages/CollectorPage';
+import ImpactPage from './pages/ImpactPage';
 import { GlobalStateProvider } from './GlobalStateProvider';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
             <Route path="stats" element={<StatsPage />} />
             <Route path="chat" element={<ChatPage />} />
             <Route path="data" element={<CollectorPage />} />
+            <Route path="impact" element={<ImpactPage />} />
           </Route>
         </Routes>
       </Router>
