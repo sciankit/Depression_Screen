@@ -1,11 +1,12 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { Home, BarChart2, MessageCircle, Activity } from 'lucide-react';
+import { Home, BarChart2, MessageCircle, Activity, Sparkles } from 'lucide-react';
 
 export default function Layout() {
     const navItems = [
         { name: 'Home', path: '/', icon: Home },
         { name: 'Chat', path: '/chat', icon: MessageCircle },
         { name: 'Data', path: '/data', icon: Activity },
+        { name: 'Viz', path: '/viz-lab', icon: Sparkles },
         { name: 'Stats', path: '/stats', icon: BarChart2 },
     ];
 
