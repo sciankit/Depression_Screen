@@ -239,9 +239,9 @@ export default function HomePage() {
 
             <section className="home-quick-grid">
                 <button
-                    className="card"
+                    className="card home-quick-card home-quick-card-talk"
                     onClick={() => navigate('/chat')}
-                    style={{ textAlign: 'left', cursor: 'pointer', border: '1px solid rgba(10,143,123,0.25)' }}
+                    style={{ textAlign: 'left', cursor: 'pointer' }}
                 >
                     <div className="chip" style={{ width: 'fit-content', marginBottom: '8px', color: 'var(--color-accent)' }}>
                         Talk
@@ -253,9 +253,9 @@ export default function HomePage() {
                 </button>
 
                 <button
-                    className="card"
+                    className="card home-quick-card home-quick-card-plan"
                     onClick={() => navigate('/plan')}
-                    style={{ textAlign: 'left', cursor: 'pointer', border: '1px solid rgba(255,95,46,0.24)' }}
+                    style={{ textAlign: 'left', cursor: 'pointer' }}
                 >
                     <div className="chip" style={{ width: 'fit-content', marginBottom: '8px', color: 'var(--color-primary)' }}>
                         Plan
@@ -267,14 +267,9 @@ export default function HomePage() {
                 </button>
 
                 <button
-                    className="card"
+                    className="card home-quick-card home-quick-card-story"
                     onClick={() => navigate('/stats')}
-                    style={{
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        border: '1px solid rgba(255,208,95,0.34)',
-                        background: 'linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,240,211,0.72))',
-                    }}
+                    style={{ textAlign: 'left', cursor: 'pointer' }}
                 >
                     <div className="chip" style={{ width: 'fit-content', marginBottom: '8px' }}>
                         Story

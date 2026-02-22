@@ -790,7 +790,7 @@ a {
 .home-task-btn {
   width: 100%;
   border: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--surface-strong);
   border-radius: 14px;
   padding: 10px;
   display: grid;
@@ -803,7 +803,7 @@ a {
 }
 
 .home-task-btn:hover {
-  border-color: rgba(255, 95, 46, 0.35);
+  border-color: color-mix(in srgb, var(--color-primary) 46%, var(--color-border));
 }
 
 .home-task-index {
@@ -815,8 +815,8 @@ a {
   justify-content: center;
   font-size: 12px;
   font-weight: 700;
-  background: rgba(255, 95, 46, 0.12);
-  color: #ca3f16;
+  background: color-mix(in srgb, var(--color-primary) 18%, var(--surface));
+  color: var(--active-link);
 }
 
 .home-week-strip {
@@ -829,7 +829,7 @@ a {
   border: 1px solid var(--color-border);
   border-radius: 10px;
   padding: 8px 4px;
-  background: rgba(255, 255, 255, 0.68);
+  background: var(--surface);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -848,13 +848,31 @@ a {
   border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 10px;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--surface);
 }
 
 .home-quick-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 12px;
+}
+
+.home-quick-card {
+  border: 1px solid var(--color-border);
+  background: var(--surface);
+}
+
+.home-quick-card-talk {
+  border-color: color-mix(in srgb, var(--color-accent) 30%, var(--color-border));
+}
+
+.home-quick-card-plan {
+  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
+}
+
+.home-quick-card-story {
+  border-color: color-mix(in srgb, var(--color-secondary) 34%, var(--color-border));
+  background: color-mix(in srgb, var(--color-secondary) 14%, var(--surface));
 }
 
 .demo-grid {
@@ -881,7 +899,8 @@ a {
   font-size: 14px;
   font-family: var(--font-sans);
   padding: 9px 10px;
-  background: rgba(255, 255, 255, 0.86);
+  background: var(--surface-strong);
+  color: var(--color-ink);
 }
 
 .demo-metric-strip {
@@ -891,7 +910,7 @@ a {
   border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 10px;
-  background: rgba(255, 255, 255, 0.62);
+  background: var(--surface);
 }
 
 .demo-mini-label {
@@ -903,7 +922,7 @@ a {
 .demo-progress-wrap {
   width: 100%;
   border-radius: 999px;
-  background: rgba(30, 40, 38, 0.08);
+  background: color-mix(in srgb, var(--color-border) 52%, transparent);
   height: 9px;
   overflow: hidden;
 }
@@ -919,7 +938,8 @@ a {
   width: 100%;
   border: 1px solid var(--color-border);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--surface-strong);
+  color: var(--color-ink);
   padding: 10px 12px;
   text-align: left;
   display: flex;
@@ -933,7 +953,7 @@ a {
 
 .demo-option-btn:hover {
   transform: translateY(-1px);
-  border-color: rgba(255, 95, 46, 0.45);
+  border-color: color-mix(in srgb, var(--color-primary) 46%, var(--color-border));
 }
 
 .demo-complete-box {
@@ -944,7 +964,7 @@ a {
   border-radius: 10px;
   padding: 10px;
   font-size: 13px;
-  background: rgba(255, 255, 255, 0.64);
+  background: var(--surface);
 }
 
 .demo-list-item {
@@ -956,7 +976,7 @@ a {
   padding: 9px 10px;
   font-size: 14px;
   line-height: 1.4;
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--surface);
 }
 
 .demo-toggle-row {
@@ -967,14 +987,14 @@ a {
   border-radius: 10px;
   padding: 8px 10px;
   font-size: 14px;
-  background: rgba(255, 255, 255, 0.68);
+  background: var(--surface);
 }
 
 .demo-escalation-box {
   border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 10px;
-  background: rgba(255, 255, 255, 0.64);
+  background: var(--surface);
 }
 
 .demo-resource-link {
@@ -984,7 +1004,8 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--surface-strong);
+  color: var(--color-ink);
 }
 
 .demo-table-wrap {
@@ -1009,7 +1030,7 @@ a {
 }
 
 .demo-table th {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--surface-strong);
   font-size: 11px;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -1031,7 +1052,7 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--surface);
 }
 
 @media (max-width: 640px) {
