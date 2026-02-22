@@ -1,17 +1,17 @@
 export const RISK_TIERS = {
     0: {
         label: "Low",
-        color: "#1f8f5f",
+        color: "var(--color-success)",
         summary: "Stable signals. Keep reinforcing healthy routines.",
     },
     1: {
         label: "Moderate",
-        color: "#d9822b",
+        color: "var(--color-warning)",
         summary: "Rising strain detected. Early intervention is recommended.",
     },
     2: {
         label: "Critical",
-        color: "#c23934",
+        color: "var(--color-danger)",
         summary: "High-risk pattern detected. Escalate immediately.",
     },
 };

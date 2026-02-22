@@ -113,8 +113,8 @@ export default function PlanPage() {
                 <XAxis dataKey="day" />
                 <YAxis domain={[0, 100]} />
                 <Tooltip />
-                <Line type="monotone" dataKey="risk" name="Risk" stroke="#c23934" strokeWidth={2.5} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="resilience" name="Resilience" stroke="#1f8f5f" strokeWidth={2.2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="risk" name="Risk" stroke="var(--color-danger)" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="resilience" name="Resilience" stroke="var(--color-success)" strokeWidth={2.2} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -150,13 +150,13 @@ export default function PlanPage() {
 
           {screeningState.completed && (
             <div className="demo-complete-box">
-              <CheckCircle2 size={15} color="#1f8f5f" />
+              <CheckCircle2 size={15} color="var(--color-success)" />
               Check-in complete. Your action plan is now personalized.
             </div>
           )}
 
           <div style={{ marginTop: '12px' }}>
-            <div className="chip" style={{ color: screeningMeta.color, borderColor: `${screeningMeta.color}55` }}>
+            <div className="chip" style={{ color: screeningMeta.color, borderColor: `color-mix(in srgb, ${screeningMeta.color} 35%, var(--color-border))` }}>
               <HeartPulse size={12} /> Check-in result: {screeningMeta.label} ({screeningSummary.totalScore} pts)
             </div>
           </div>
@@ -176,7 +176,7 @@ export default function PlanPage() {
           <div style={{ display: 'grid', gap: '8px' }}>
             {adaptivePlan.actions.map((item) => (
               <div key={item} className="demo-list-item">
-                <CheckCircle2 size={14} color="#1f8f5f" />
+                <CheckCircle2 size={14} color="var(--color-success)" />
                 <span>{item}</span>
               </div>
             ))}
@@ -206,7 +206,7 @@ export default function PlanPage() {
             </label>
           </div>
 
-          <div className="demo-escalation-box" style={{ borderColor: `${effectiveMeta.color}66` }}>
+          <div className="demo-escalation-box" style={{ borderColor: `color-mix(in srgb, ${effectiveMeta.color} 38%, var(--color-border))` }}>
             <div style={{ fontWeight: 800, marginBottom: '6px', color: effectiveMeta.color }}>
               Current Safety Decision: {effectiveTier >= 2 ? 'Immediate Support' : effectiveTier === 1 ? 'Early Support' : 'Routine Support'}
             </div>

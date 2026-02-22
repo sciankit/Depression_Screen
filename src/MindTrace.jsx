@@ -150,7 +150,7 @@ export default function MindTrace() {
     error: "Something went wrong",
   }[status];
 
-  const btnColor = status === "error" ? "#c0392b" : status === "playing" ? "var(--color-ink)" : "var(--color-primary)";
+  const btnColor = status === "error" ? "var(--color-danger)" : status === "playing" ? "var(--color-ink)" : "var(--color-primary)";
 
   return (
     <div style={{
@@ -202,7 +202,7 @@ export default function MindTrace() {
               <XAxis dataKey="day" axisLine={false} tickLine={false} />
               <YAxis domain={[0, 10]} axisLine={false} tickLine={false} width={24} />
               <Tooltip content={<CustomTooltip unit="h" />} />
-              <Bar dataKey="hours" fill="#c9b99a" radius={[4, 4, 0, 0]}
+              <Bar dataKey="hours" fill="var(--chart-sleep)" radius={[4, 4, 0, 0]}
                 label={false}
               />
             </BarChart>
@@ -218,9 +218,9 @@ export default function MindTrace() {
               <Tooltip content={<CustomTooltip unit="ms" />} />
               <Line
                 type="monotone" dataKey="hrv"
-                stroke="#7e9e8a" strokeWidth={2.5}
-                dot={{ fill: "#7e9e8a", r: 4, strokeWidth: 0 }}
-                activeDot={{ r: 6, fill: "#5a8068" }}
+                stroke="var(--chart-hrv)" strokeWidth={2.5}
+                dot={{ fill: "var(--chart-hrv)", r: 4, strokeWidth: 0 }}
+                activeDot={{ r: 6, fill: "var(--chart-hrv-strong)" }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -233,7 +233,7 @@ export default function MindTrace() {
               <XAxis dataKey="day" axisLine={false} tickLine={false} />
               <YAxis domain={[0, 12000]} axisLine={false} tickLine={false} width={36} />
               <Tooltip content={<CustomTooltip unit=" steps" />} />
-              <Bar dataKey="steps" fill="#a8b8c8" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="steps" fill="var(--chart-steps)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -247,9 +247,9 @@ export default function MindTrace() {
               <Tooltip content={<CustomTooltip unit=" pts" />} />
               <Line
                 type="monotone" dataKey="score"
-                stroke="#d98971" strokeWidth={2.5}
-                dot={{ fill: "#d98971", r: 4, strokeWidth: 0 }}
-                activeDot={{ r: 6, fill: "#b96951" }}
+                stroke="var(--chart-phq)" strokeWidth={2.5}
+                dot={{ fill: "var(--chart-phq)", r: 4, strokeWidth: 0 }}
+                activeDot={{ r: 6, fill: "var(--chart-phq-strong)" }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -292,7 +292,7 @@ export default function MindTrace() {
             style={{
               position: "relative",
               background: btnColor,
-              color: "#ffffff",
+              color: "var(--color-on-primary)",
               border: "none",
               borderRadius: 50,
               padding: "14px 28px",
@@ -311,7 +311,7 @@ export default function MindTrace() {
               <span style={{
                 width: 12, height: 12,
                 border: "2px solid rgba(255,255,255,0.35)",
-                borderTopColor: "#fff",
+                borderTopColor: "var(--color-on-primary)",
                 borderRadius: "50%",
                 display: "inline-block",
                 animation: "spin 0.7s linear infinite",

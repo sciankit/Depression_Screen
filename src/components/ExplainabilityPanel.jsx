@@ -44,7 +44,7 @@ export default function ExplainabilityPanel() {
                         <XAxis dataKey="signal" angle={-15} textAnchor="end" height={60} interval={0} />
                         <YAxis unit="%" />
                         <Tooltip formatter={(value) => [`${value}%`, 'Importance']} />
-                        <Bar dataKey="importance" fill="#2A3C4F" radius={[8, 8, 0, 0]} />
+                        <Bar dataKey="importance" fill="var(--chart-neutral)" radius={[8, 8, 0, 0]} />
                     </BarChart>
                 </ResponsiveContainer>
             </div>

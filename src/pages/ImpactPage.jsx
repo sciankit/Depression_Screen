@@ -66,15 +66,15 @@ export default function ImpactPage() {
                 <h3 style={{ marginTop: 0, marginBottom: '8px' }}>Governance Guardrails</h3>
                 <div style={{ display: 'grid', gap: '10px' }}>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <ShieldCheck size={16} color="#1f8f5f" />
+                        <ShieldCheck size={16} color="var(--color-success)" />
                         <span>Non-diagnostic positioning with human escalation oversight</span>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <HeartPulse size={16} color="#d9822b" />
+                        <HeartPulse size={16} color="var(--color-warning)" />
                         <span>Tiered interventions prioritize early behavioral support first</span>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <Users size={16} color="#2A3C4F" />
+                        <Users size={16} color="var(--chart-neutral)" />
                         <span>Trusted-contact and local-service pathways require explicit consent</span>
                     </div>
                 </div>

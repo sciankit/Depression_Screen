@@ -121,6 +121,7 @@ export default function SafetyEscalationConsole({ tier }) {
                             border: '1px solid var(--color-border)',
                             borderRadius: '10px',
                             padding: '10px',
+                            background: 'var(--surface)',
                             display: 'flex',
                             justifyContent: 'space-between',
                             gap: '8px',
@@ -137,9 +138,9 @@ export default function SafetyEscalationConsole({ tier }) {
                             type="button"
                             onClick={() => removeContact(contact.id)}
                             style={{
-                                border: '1px solid #e6b8b8',
-                                background: '#fff4f4',
-                                color: '#b93939',
+                                border: '1px solid color-mix(in srgb, var(--color-danger) 36%, var(--color-border))',
+                                background: 'var(--color-danger-soft)',
+                                color: 'var(--color-danger)',
                                 borderRadius: '8px',
                                 padding: '6px 10px',
                                 cursor: 'pointer',
@@ -156,13 +157,13 @@ export default function SafetyEscalationConsole({ tier }) {
                     value={newContact.name}
                     onChange={(e) => setNewContact((prev) => ({ ...prev, name: e.target.value }))}
                     placeholder="Contact name"
-                    style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+                    style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'var(--surface-strong)', color: 'var(--color-ink)' }}
                 />
                 <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '8px' }}>
                     <select
                         value={newContact.channel}
                         onChange={(e) => setNewContact((prev) => ({ ...prev, channel: e.target.value }))}
-                        style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+                        style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'var(--surface-strong)', color: 'var(--color-ink)' }}
                     >
                         <option>SMS</option>
                         <option>Call</option>
@@ -172,7 +173,7 @@ export default function SafetyEscalationConsole({ tier }) {
                         value={newContact.value}
                         onChange={(e) => setNewContact((prev) => ({ ...prev, value: e.target.value }))}
                         placeholder="Phone or email"
-                        style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+                        style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'var(--surface-strong)', color: 'var(--color-ink)' }}
                     />
                 </div>
                 <button type="submit" className="btn-primary" style={{ width: 'fit-content', padding: '10px 14px', fontSize: '13px' }}>

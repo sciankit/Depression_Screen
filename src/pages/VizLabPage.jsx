@@ -43,12 +43,12 @@ export default function VizLabPage() {
                         <AreaChart data={timeline}>
                             <defs>
                                 <linearGradient id="sleepFill" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#8FA396" stopOpacity={0.35} />
-                                    <stop offset="100%" stopColor="#8FA396" stopOpacity={0} />
+                                    <stop offset="0%" stopColor="var(--chart-sleep)" stopOpacity={0.35} />
+                                    <stop offset="100%" stopColor="var(--chart-sleep)" stopOpacity={0} />
                                 </linearGradient>
                                 <linearGradient id="stressFill" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#d9822b" stopOpacity={0.35} />
-                                    <stop offset="100%" stopColor="#d9822b" stopOpacity={0} />
+                                    <stop offset="0%" stopColor="var(--chart-warm)" stopOpacity={0.35} />
+                                    <stop offset="100%" stopColor="var(--chart-warm)" stopOpacity={0} />
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="4 4" vertical={false} />
@@ -56,8 +56,8 @@ export default function VizLabPage() {
                             <YAxis domain={[0, 100]} />
                             <Tooltip />
                             <Legend />
-                            <Area type="monotone" dataKey="sleepRegularity" stroke="#58796a" fill="url(#sleepFill)" />
-                            <Area type="monotone" dataKey="stressLoad" stroke="#b7601f" fill="url(#stressFill)" />
+                            <Area type="monotone" dataKey="sleepRegularity" stroke="var(--chart-hrv-strong)" fill="url(#sleepFill)" />
+                            <Area type="monotone" dataKey="stressLoad" stroke="var(--chart-warm)" fill="url(#stressFill)" />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
@@ -72,8 +72,8 @@ export default function VizLabPage() {
                                 <PolarGrid />
                                 <PolarAngleAxis dataKey="metric" />
                                 <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                                <Radar name="Baseline" dataKey="baseline" stroke="#2A3C4F" fill="#2A3C4F" fillOpacity={0.16} />
-                                <Radar name="Current" dataKey="current" stroke="#F28C38" fill="#F28C38" fillOpacity={0.28} />
+                                <Radar name="Baseline" dataKey="baseline" stroke="var(--chart-neutral)" fill="var(--chart-neutral)" fillOpacity={0.16} />
+                                <Radar name="Current" dataKey="current" stroke="var(--chart-warm)" fill="var(--chart-warm)" fillOpacity={0.28} />
                                 <Legend />
                             </RadarChart>
                         </ResponsiveContainer>

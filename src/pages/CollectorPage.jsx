@@ -9,7 +9,7 @@ const DEMO_POLL_MS = 8000;
 
 const METRIC_DEFINITIONS = {
     "Heart Rate": {
-        color: "#F28C38", // var(--color-primary)
+        color: "var(--chart-warm)",
         icon: "♥",
         metrics: {
             "DHRb.cvc": "Daily HR Baseline CV",
@@ -22,7 +22,7 @@ const METRIC_DEFINITIONS = {
         },
     },
     "Circadian (Nonparametric)": {
-        color: "#2A3C4F", // var(--color-accent)
+        color: "var(--chart-neutral)",
         icon: "◑",
         metrics: {
             "ISf.stg.wdh": "IS Fragmentation Stage WD",
@@ -43,7 +43,7 @@ const METRIC_DEFINITIONS = {
         },
     },
     "Circadian (Cosinor)": {
-        color: "#8FA396", // Soft green
+        color: "var(--chart-sleep)",
         icon: "∿",
         metrics: {
             "acrom.st": "Acrophase Steps",
@@ -57,7 +57,7 @@ const METRIC_DEFINITIONS = {
         },
     },
     "Sleep": {
-        color: "#F6C244", // var(--color-secondary)
+        color: "var(--color-warning)",
         icon: "☽",
         metrics: {
             "sleep.offset": "Sleep Offset",
@@ -235,12 +235,12 @@ export default function CollectorPage() {
                     BioHealth Collector
                 </h1>
 
-                <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--color-bg-card)', padding: '16px', borderRadius: '16px', border: '1px solid var(--color-border)', boxShadow: '0 4px 16px rgba(42, 60, 79, 0.04)' }}>
+                <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--color-bg-card)', padding: '16px', borderRadius: '16px', border: '1px solid var(--color-border)', boxShadow: 'var(--card-shadow)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <div style={{
                             width: '12px', height: '12px', borderRadius: '50%',
-                            background: isCollecting ? '#F28C38' : '#8FA396',
-                            boxShadow: isCollecting ? '0 0 10px rgba(242, 140, 56, 0.6)' : 'none',
+                            background: isCollecting ? 'var(--chart-warm)' : 'var(--chart-sleep)',
+                            boxShadow: isCollecting ? '0 0 12px color-mix(in srgb, var(--chart-warm) 64%, transparent)' : 'none',
                             transition: 'background 0.3s'
                         }} />
                         <div>
@@ -262,10 +262,10 @@ export default function CollectorPage() {
                     <button onClick={exportSnapshot} className="btn-primary" style={{ padding: '10px 16px', fontSize: '13px' }}>
                         <Download size={14} /> Export JSON Snapshot
                     </button>
-                    <div style={{ padding: '10px 14px', borderRadius: '999px', border: '1px solid var(--color-border)', background: '#fff', fontSize: '12px', fontWeight: 600 }}>
+                    <div style={{ padding: '10px 14px', borderRadius: '999px', border: '1px solid var(--color-border)', background: 'var(--surface-strong)', fontSize: '12px', fontWeight: 600 }}>
                         Actian-ready structured features
                     </div>
-                    <div style={{ padding: '10px 14px', borderRadius: '999px', border: '1px solid var(--color-border)', background: '#fff', fontSize: '12px', fontWeight: 600 }}>
+                    <div style={{ padding: '10px 14px', borderRadius: '999px', border: '1px solid var(--color-border)', background: 'var(--surface-strong)', fontSize: '12px', fontWeight: 600 }}>
                         Sphinx docs schema compatible
                     </div>
                 </div>
@@ -313,7 +313,7 @@ export default function CollectorPage() {
                                 </div>
                                 <div style={{ padding: '8px 0' }}>
                                     {Object.entries(group.metrics).map(([key, label]) => (
-                                        <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 20px', borderBottom: '1px solid #F5EBE0' }}>
+                                        <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 20px', borderBottom: '1px solid color-mix(in srgb, var(--color-border) 68%, transparent)' }}>
                                             <div style={{ flex: 1, paddingRight: '12px' }}>
                                                 <div style={{ fontSize: '13px', color: 'var(--color-text-main)', marginBottom: '2px' }}>{label}</div>
                                                 <div style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontFamily: 'monospace' }}>{key}</div>
@@ -425,7 +425,7 @@ export default function CollectorPage() {
                                 <div style={{
                                     borderRadius: '10px',
                                     border: '1px solid var(--color-border)',
-                                    background: '#fff',
+                                    background: 'var(--surface-elevated)',
                                     padding: '10px',
                                     fontSize: '12px',
                                     fontFamily: 'monospace',
@@ -468,7 +468,7 @@ export default function CollectorPage() {
                             {PERMISSIONS.map((p) => (
                                 <div key={p.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'var(--color-bg)', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
                                     <span style={{ fontSize: '14px', fontWeight: 500 }}>{p.label}</span>
-                                    <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.5px', color: 'var(--color-primary)', background: '#FCECDD', padding: '4px 10px', borderRadius: '12px' }}>
+                                    <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.5px', color: 'var(--color-warning)', background: 'var(--color-warning-soft)', padding: '4px 10px', borderRadius: '12px' }}>
                                         {p.granted ? "CONNECTED" : "OFF"}
                                     </span>
                                 </div>
