@@ -1,11 +1,11 @@
-# MoodLens
+# 🧠 MoodLens: Catching the Storm Before It Hits
 
 <p align="center">
   <img src="images/moodlens_crop.png" alt="MoodLens logo" width="180" />
 </p>
 
 <p align="center">
-  <strong>Early mental health risk detection and supportive intervention planning from wearable + conversational signals.</strong>
+  <strong>Passive mental health risk detection and supportive intervention planning from wearable + message logs.</strong>
 </p>
 
 <p align="center">
@@ -14,18 +14,27 @@
   <img src="https://img.shields.io/badge/Status-Prototype-orange" alt="Prototype" />
 </p>
 
-## Executive Summary
-MoodLens is an AI-assisted prevention and support application that helps identify mental health risk patterns early using passive digital biomarkers and conversational signals. It combines model inference, tiered safety logic, and guided daily interventions into a single user-facing experience.
+---
 
-MoodLens is designed for early support, not diagnosis.
+## 🔗 Project Links
+- **🌐 Live Demo:** [mymoodlens.vercel.app](https://mymoodlens.vercel.app)
+- **🎨 Design Specs:** [Figma Board](figma.com/make/P1XolyuEL2wsGdTxLjhysS/MoodLens?t=wnHRINpw1j1xbFdk-0)
+- **📖 Technical Docs:** [Documentation](https://docs.google.com/document/d/1Kda0piDNNX-MX9SClmGdG3jWk4bufQMjBttqhIKtmQs/edit?usp=sharing)
+- **📺 Video Walkthrough:** [YouTube Demo](https://youtu.be/bELvE8N3xHI)
 
-## What MoodLens Does
-- Ingests multimodal inputs (wearable-style telemetry, behavioral proxies, and user conversation).
-- Scores risk patterns with Databricks-hosted NLP and PHQ models.
-- Applies a safety-first ensemble policy with escalation overrides.
-- Produces a personalized daily action plan based on burden categories.
-- Routes users to tiered support pathways, including crisis resources when needed.
+---
 
+## 📝 Executive Summary
+MoodLens is an AI-assisted prevention and support application that identifies mental health risk patterns early using passive digital biomarkers and conversational signals. By fusing biometric telemetry with linguistic analysis, it bridges the "critical middle ground" in mental healthcare—reaching users in the weeks before a crisis occurs.
+
+**MoodLens is designed for early support, not diagnosis.**
+
+## 🚀 What MoodLens Does
+- **Multimodal Ingestion:** Syncs passive signals (HRV, sleep, steps) via Google Health Connect and monitors linguistic sentiment.
+- **Ensemble Inference:** Scores risk patterns using **XGBoost** (Biometrics) and **multiMentalRoBERTa** (NLP) hosted on **Databricks Serving Endpoints**.
+- **Tiered Safety Logic:** Applies a clinical PHQ-9 aligned framework with hard safety overrides for suicidal ideation.
+- **Adaptive Intervention:** Routes users to one of four **ElevenLabs** agents (Companion, Coach, or Responder) based on real-time risk tiers.
+  
 ## Product Experience
 Primary app routes:
 
@@ -39,18 +48,18 @@ Primary app routes:
 
 Additional internal routes include `/data`, `/impact`, `/viz-lab`, and `/dev`.
 
-## System Architecture
-MoodLens follows a decision pipeline built for explainability and safety:
+## 🛠 System Architecture
+MoodLens follows an explainability-first decision pipeline:
 
-1. Collect signals.
-2. Score NLP + PHQ models.
-3. Apply ensemble decision logic and safety overrides.
-4. Generate intervention and escalation recommendations.
-5. Present user actions and explainability context.
+1. **Collect:** Passive smartwatch signals + conversational message data.
+2. **Score:** Parallel inference through Databricks-hosted NLP + PHQ models.
+3. **Analyze:** Ensemble decision logic applies safety-first escalation overrides.
+4. **Intervene:** Real-time generation of intervention plans and agent routing.
+5. **Explain:** Sphinx-generated summaries provide context for clinical contributors.
 
 ![MoodLens architecture](images/Architecture.png)
 
-## Key Capabilities
+## ✨ Key Capabilities
 - Adaptive screening engine (`src/screening/adaptiveEngine.js`).
 - Tiered risk logic with critical safety override handling.
 - Explainability summaries for key risk contributors.
@@ -58,13 +67,14 @@ MoodLens follows a decision pipeline built for explainability and safety:
 - Exportable structured snapshots for analysis and submission workflows.
 - Optional voice conversation via ElevenLabs with risk-tier-aware agent routing.
 
-## Tech Stack
+## 💻 Tech Stack
 - Frontend: React 19, React Router, Vite.
-- Visualization: Recharts.
-- AI services: Databricks serving endpoints, ElevenLabs conversational + TTS APIs.
-- Tooling: ESLint, Node scripts for docs and submission assets.
+- Visualisation: Sphinx.
+- ML/Ops: Databricks (Model Serving), XGBoost, multiMentalRoBERTa.
+- Voice AI: ElevenLabs (Conversational Agents + TTS + RAG).
 
-## Quick Start
+
+## ⚡ Quick Start
 ### 1. Prerequisites
 - Node.js 20+ (recommended).
 - npm 10+.
@@ -109,7 +119,7 @@ npm run submission:generate # Build submission kit assets
 main/
 ├── docs/                   # Submission + technical documentation
 ├── images/                 # Brand and architecture assets
-├── ml/                     # Notebook + synthetic dataset
+├── ml/                     # Databricks Notebooks + synthetic dataset
 ├── public/                 # Static public assets
 ├── scripts/                # Automation scripts for docs/submission
 ├── src/
@@ -122,10 +132,10 @@ main/
 └── README.md
 ```
 
-## Safety and Ethical Guardrails
-- MoodLens is a prevention and support assistant, not a diagnostic tool.
-- Escalation pathways are explicit and user-visible.
-- Crisis guidance is surfaced for high-risk safety states.
+## ⚖️ Safety and Ethical Guardrails
+- Prevention, Not Diagnosis: MoodLens acts as a support assistant, not a clinical diagnostic tool.
+- Privacy First: Responders see context (PHQ trends) rather than raw message content to preserve user dignity.
+- Hard Overrides: Suicidal ideation markers bypass the aggregate score to trigger immediate Tier 2 protocols.
 - Human-in-the-loop support is part of the operating model.
 
 ## Documentation
@@ -134,5 +144,5 @@ main/
 - Submission resources: `docs/submission/`
 - Integration notes: `docs/VECTORAI_INTEGRATION.md`, `docs/DATABRICKS_UN_PLAYBOOK.md`, `docs/SPHINX_EXPLAINABILITY.md`
 
-## Disclaimer
-MoodLens does not replace licensed mental-health professionals or emergency services. If someone is in immediate danger, contact local emergency services or a crisis hotline right away.
+##  ⚠️ Disclaimer
+MoodLens does not replace licensed mental-health professionals or emergency services. If you are in immediate danger, contact local emergency services or a crisis hotline (e.g., 988 in the US) right away.
