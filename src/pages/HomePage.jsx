@@ -21,18 +21,21 @@ const TODAY_TASKS = [
         detail: 'Name your current mood and get an adjusted response.',
         route: '/chat',
         icon: MessageCircle,
+        emoji: '💬',
     },
     {
         title: 'Adaptive plan refresh',
         detail: 'Run a short branching check-in for today\'s plan.',
         route: '/plan',
         icon: Target,
+        emoji: '🎯',
     },
     {
         title: 'Care circle quick review',
         detail: 'Verify support contacts and escalation settings.',
         route: '/safety',
         icon: ShieldAlert,
+        emoji: '💚',
     },
 ];
 
@@ -111,12 +114,12 @@ export default function HomePage() {
 
     return (
         <div className="screen-wrap animate-fade-in" style={{ maxWidth: '860px' }}>
-            <section className="card home-daily-card" style={{ marginBottom: '12px' }}>
+            <section className="card home-daily-card" style={{ marginBottom: '16px' }}>
                 <div className="chip home-daily-chip">
                     <span style={{ width: 8, height: 8, borderRadius: 99, background: riskMeta.color }} />
                     {riskMeta.label} support
                 </div>
-                <h1 className="display home-daily-title">Daily Check-in</h1>
+                <h1 className="display home-daily-title"><span className="section-icon-lg">🧘</span>Daily Check-in</h1>
                 <p className="home-daily-subtitle">Take 2 minutes to talk with your mindful companion about your day.</p>
 
                 <div className="home-daily-actions">
@@ -136,17 +139,17 @@ export default function HomePage() {
                 </div>
             </section>
 
-            <section className="home-quick-grid" style={{ marginBottom: '12px' }}>
+            <section className="home-quick-grid" style={{ marginBottom: '16px' }}>
                 <button
                     className="card home-quick-card home-quick-card-talk"
                     onClick={() => navigate('/chat')}
                     style={{ textAlign: 'left', cursor: 'pointer' }}
                 >
-                    <div className="chip" style={{ width: 'fit-content', marginBottom: '8px', color: 'var(--color-accent)' }}>
+                    <div className="chip" style={{ width: 'fit-content', marginBottom: '8px', color: 'var(--color-secondary)' }}>
                         Talk
                     </div>
-                    <h3 style={{ fontSize: '21px', marginBottom: '6px' }}>2-minute mood check</h3>
-                    <p className="text-muted" style={{ margin: 0, fontSize: '14px' }}>
+                    <h3 style={{ fontSize: '20px', marginBottom: '6px' }}><span className="section-icon">💭</span>2-minute mood check</h3>
+                    <p className="text-muted" style={{ margin: 0, fontSize: '14px', lineHeight: 1.5 }}>
                         Vent, reflect, reset. Your assistant adapts to how your day feels.
                     </p>
                 </button>
@@ -159,28 +162,28 @@ export default function HomePage() {
                     <div className="chip" style={{ width: 'fit-content', marginBottom: '8px' }}>
                         Story
                     </div>
-                    <h3 style={{ fontSize: '21px', marginBottom: '6px' }}>Your weekly vibe arc</h3>
-                    <p className="text-muted" style={{ margin: 0, fontSize: '14px' }}>
+                    <h3 style={{ fontSize: '20px', marginBottom: '6px' }}><span className="section-icon">🌈</span>Your weekly vibe arc</h3>
+                    <p className="text-muted" style={{ margin: 0, fontSize: '14px', lineHeight: 1.5 }}>
                         See your patterns as a personal story, not a clinical dashboard.
                     </p>
                 </button>
             </section>
 
             <section className="card">
-                <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>Your next best actions</h3>
-                <p className="text-muted" style={{ marginTop: 0, marginBottom: '10px', fontSize: '14px' }}>
+                <h3 style={{ fontSize: '22px', marginBottom: '6px' }}><span className="section-icon">✨</span>Your next best actions</h3>
+                <p className="text-muted" style={{ marginTop: 0, marginBottom: '14px', fontSize: '14px' }}>
                     Ordered by impact on your current support profile.
                 </p>
 
-                <div style={{ display: 'grid', gap: '8px' }}>
+                <div style={{ display: 'grid', gap: '10px' }}>
                     {TODAY_TASKS.map((task, idx) => (
                         <button key={task.title} onClick={() => navigate(task.route)} className="home-task-btn">
-                            <div className="home-task-index">{idx + 1}</div>
+                            <div className="home-task-index" style={{ fontSize: '18px' }}>{task.emoji}</div>
                             <div style={{ textAlign: 'left' }}>
-                                <div style={{ fontWeight: 700, fontSize: '14px' }}>{task.title}</div>
+                                <div style={{ fontWeight: 600, fontSize: '14px' }}>{task.title}</div>
                                 <div className="text-muted" style={{ fontSize: '13px' }}>{task.detail}</div>
                             </div>
-                            <task.icon size={16} />
+                            <task.icon size={16} style={{ opacity: 0.4 }} />
                         </button>
                     ))}
                 </div>

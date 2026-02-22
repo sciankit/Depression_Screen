@@ -8,7 +8,7 @@ import emailjs from '@emailjs/browser';
 export default function ChatPage() {
     const { scoreModel, interventionPlan, ensembleDecision, prediction, phqPrediction, userName } = useGlobalState();
     const [messages, setMessages] = useState([
-        { id: 1, text: 'Hey, I’m here. Want to name your mood in one sentence? Start by connecting below.', sender: 'bot' },
+        { id: 1, text: 'Hey, I\u2019m here. Want to name your mood in one sentence? Start by connecting below.', sender: 'bot' },
     ]);
     const [engagementState, setEngagementState] = useState(() => loadEngagementState());
     const [input, setInput] = useState('');
@@ -19,12 +19,17 @@ export default function ChatPage() {
     const messagesEndRef = useRef(null);
     const conversationRef = useRef(null);
     const messagesRef = useRef(messages);
+    const initialRenderRef = useRef(true);
 
     const tier = interventionPlan?.tier ?? ensembleDecision?.tier ?? prediction?.risk_tier ?? 0;
     const streak = useMemo(() => calculateStreak(engagementState.checkInDays), [engagementState.checkInDays]);
 
     useEffect(() => {
         messagesRef.current = messages;
+        if (initialRenderRef.current) {
+            initialRenderRef.current = false;
+            return;
+        }
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, isTyping]);
 
@@ -221,17 +226,23 @@ export default function ChatPage() {
     };
 
     return (
-        <div className="screen-wrap animate-fade-in" style={{ maxWidth: '860px' }}>
-            <div className="card" style={{ marginBottom: '12px' }}>
-                <h1 className="display" style={{ fontSize: '30px', marginBottom: '8px' }}>Talk</h1>
-                <p className="text-muted" style={{ margin: 0 }}>
+        <div className="screen-wrap animate-fade-in chat-page-wrap" style={{ maxWidth: '860px' }}>
+            <div className="card" style={{ marginBottom: '16px', textAlign: 'center' }}>
+                <h1 className="display" style={{ fontSize: '28px', marginBottom: '6px' }}><span className="section-icon-lg">🕊️</span>Talk</h1>
+                <p className="text-muted" style={{ margin: 0, fontSize: '14px' }}>
                     Type or use voice. Streak: {streak}d.
                 </p>
             </div>
 
-            <div className="card" style={{ padding: '12px', marginBottom: '12px' }}>
+            <div className="card chat-card">
                 <div className="chat-thread">
                     {messages.map((msg) => {
+                        const rowClass = msg.sender === 'user'
+                            ? 'chat-row chat-row-user'
+                            : msg.sender === 'system'
+                                ? 'chat-row chat-row-system'
+                                : 'chat-row chat-row-bot';
+
                         const bubbleClass = msg.sender === 'user'
                             ? 'chat-bubble chat-bubble-user'
                             : msg.sender === 'system'
@@ -239,65 +250,58 @@ export default function ChatPage() {
                                 : 'chat-bubble chat-bubble-bot';
 
                         return (
-                            <div key={msg.id} style={{ alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '82%' }}>
+                            <div key={msg.id} className={rowClass}>
+                                {msg.sender === 'bot' && <span className="chat-sender">MindTrace</span>}
                                 <div className={bubbleClass}>{msg.text}</div>
                             </div>
                         );
                     })}
 
                     {isTyping && (
-                        <div style={{ alignSelf: 'flex-start' }}>
-                            <div className="chip">agent is speaking...</div>
+                        <div className="chat-typing">
+                            <span className="chat-typing-dot" />
+                            <span className="chat-typing-dot" />
+                            <span className="chat-typing-dot" />
                         </div>
                     )}
                     <div ref={messagesEndRef} />
                 </div>
+
+                <form onSubmit={handleSend} className="chat-input-bar">
+                    <input
+                        type="text"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder="Drop your thoughts here..."
+                        className="chat-input"
+                    />
+
+                    <button
+                        type="button"
+                        onClick={toggleConnection}
+                        className="chip"
+                        style={{
+                            height: 48,
+                            borderRadius: 999,
+                            padding: '0 16px',
+                            fontWeight: 600,
+                            background: isConnected ? 'var(--color-danger-soft)' : 'var(--surface)',
+                            color: isConnected ? 'var(--color-danger)' : 'inherit',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        {isConnected ? <Square size={12} fill="currentColor" /> : <Mic size={15} />}
+                        {isConnected ? 'Disconnect' : 'Connect'}
+                    </button>
+
+                    <button type="submit" className="btn-primary" style={{ width: 48, height: 48, borderRadius: '50%', padding: 0 }}>
+                        <Send size={17} />
+                    </button>
+                </form>
             </div>
 
-            <form onSubmit={handleSend} className="card" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Drop your thoughts here..."
-                    className="chat-input"
-                />
-
-                <button
-                    type="button"
-                    onClick={toggleMicrophone}
-                    className="chip"
-                    disabled={!isConnected}
-                    style={{
-                        height: 46,
-                        borderRadius: 999,
-                        padding: '0 14px',
-                        fontWeight: 700,
-                        background: isMicActive ? '#FF2D2D22' : 'transparent',
-                        color: isMicActive ? '#FF2D2D' : 'inherit',
-                        opacity: isConnected ? 1 : 0.5
-                    }}
-                >
-                    {isMicActive ? <Square size={12} fill="currentColor" /> : <Mic size={15} />}
-                    {isMicActive ? 'Stop' : 'Speak'}
-                </button>
-
-                <button
-                    type="button"
-                    onClick={toggleConnection}
-                    className="chip"
-                    style={{ height: 46, borderRadius: 999, padding: '0 14px', fontWeight: 700, background: isConnected ? '#FF2D2D22' : 'transparent', color: isConnected ? '#FF2D2D' : 'inherit' }}
-                >
-                    {isConnected ? 'Disconnect' : 'Connect Agent'}
-                </button>
-
-                <button type="submit" className="btn-primary" style={{ width: 46, height: 46, borderRadius: '50%', padding: 0 }}>
-                    <Send size={17} />
-                </button>
-            </form>
-
             {speechError && (
-                <p className="text-muted" style={{ marginTop: '10px', marginBottom: 0, fontSize: '13px' }}>
+                <p className="text-muted" style={{ marginTop: '12px', marginBottom: 0, fontSize: '13px' }}>
                     {speechError}
                 </p>
             )}

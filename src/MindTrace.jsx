@@ -36,15 +36,14 @@ const CustomTooltip = ({ active, payload, label, unit }) => {
   if (active && payload && payload.length) {
     return (
       <div style={{
-        background: "var(--surface-strong)",
-        border: "1px solid var(--color-border)",
-        borderRadius: 8,
-        padding: "8px 14px",
-        fontSize: 12,
+        background: "var(--surface-elevated)",
+        borderRadius: 14,
+        padding: "10px 16px",
+        fontSize: 13,
         color: "var(--color-ink)",
         boxShadow: "var(--card-shadow)",
       }}>
-        <div style={{ fontWeight: 600, marginBottom: 2 }}>{label}</div>
+        <div style={{ fontWeight: 600, marginBottom: 3 }}>{label}</div>
         <div style={{ color: "var(--color-muted)" }}>{payload[0].value}{unit}</div>
       </div>
     );
@@ -52,19 +51,20 @@ const CustomTooltip = ({ active, payload, label, unit }) => {
   return null;
 };
 
-const ChartCard = ({ title, subtitle, children }) => (
+const ChartCard = ({ title, subtitle, emoji, children }) => (
   <div style={{
-    background: "var(--surface-strong)",
-    border: "1px solid var(--color-border)",
-    borderRadius: 16,
-    padding: "24px 24px 16px",
+    background: "var(--surface-tint)",
+    borderRadius: 24,
+    padding: "24px 24px 18px",
     flex: 1,
     minWidth: 260,
+    boxShadow: "var(--card-shadow)",
   }}>
-    <div style={{ marginBottom: 4, fontSize: 13, fontWeight: 600, color: "var(--color-ink)", letterSpacing: "-0.2px" }}>
+    <div style={{ fontSize: 28, marginBottom: 6 }}>{emoji}</div>
+    <div style={{ marginBottom: 3, fontSize: 14, fontWeight: 700, fontFamily: "var(--font-display)", color: "var(--color-ink)", letterSpacing: "-0.01em" }}>
       {title}
     </div>
-    <div style={{ marginBottom: 20, fontSize: 11, color: "var(--color-muted)" }}>{subtitle}</div>
+    <div style={{ marginBottom: 18, fontSize: 12, color: "var(--color-muted)" }}>{subtitle}</div>
     {children}
   </div>
 );
@@ -78,17 +78,14 @@ export default function MindTrace() {
     }}>
       <style>{`
         .recharts-cartesian-axis-tick-value { font-size: 11px; fill: var(--color-muted); }
-        .recharts-cartesian-grid line { stroke: var(--color-border); }
+        .recharts-cartesian-grid line { stroke: var(--color-border); stroke-dasharray: 4 4; }
       `}</style>
 
-      <div style={{ maxWidth: 900, margin: "0 auto 24px" }}>
-        <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "var(--color-muted)", textTransform: "uppercase", marginBottom: 8 }}>
-          Weekly Report · Feb 15 – 21, 2026
-        </div>
-        <h1 className="display" style={{ fontSize: 32, fontWeight: 500, color: "var(--color-ink)", letterSpacing: "-0.5px", margin: 0 }}>
-          Your Wellbeing at a Glance
+      <div style={{ maxWidth: 900, margin: "0 auto 28px", textAlign: "center" }}>
+        <h1 className="display" style={{ fontSize: 30, fontWeight: 700, color: "var(--color-ink)", letterSpacing: "-0.02em", margin: "4px 0 0" }}>
+          <span className="section-icon-lg">🌊</span>Your Wellbeing at a Glance
         </h1>
-        <p style={{ marginTop: 8, fontSize: 14, color: "var(--color-muted)", lineHeight: 1.6, maxWidth: 520 }}>
+        <p style={{ marginTop: 10, fontSize: 14, color: "var(--color-muted)", lineHeight: 1.7, maxWidth: 460, marginInline: "auto" }}>
           Passive signals from your wearable and phone, summarized for the week.
           Mid-week showed strain, then weekend recovery.
         </p>
@@ -101,19 +98,19 @@ export default function MindTrace() {
         gap: 16,
         flexWrap: "wrap",
       }}>
-        <ChartCard title="Sleep Duration" subtitle="Hours per night">
+        <ChartCard title="Sleep Duration" subtitle="Hours per night" emoji="💤">
           <ResponsiveContainer width="100%" height={140}>
-            <BarChart data={sleepData} barSize={20}>
+            <BarChart data={sleepData} barSize={18}>
               <CartesianGrid vertical={false} />
               <XAxis dataKey="day" axisLine={false} tickLine={false} />
               <YAxis domain={[0, 10]} axisLine={false} tickLine={false} width={24} />
               <Tooltip content={<CustomTooltip unit="h" />} />
-              <Bar dataKey="hours" fill="var(--chart-sleep)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="hours" fill="var(--chart-sleep)" radius={[10, 10, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="Heart Rate Variability" subtitle="ms - higher is better">
+        <ChartCard title="Heart Rate Variability" subtitle="ms — higher is better" emoji="💓">
           <ResponsiveContainer width="100%" height={140}>
             <LineChart data={heartRateData}>
               <CartesianGrid vertical={false} />
@@ -124,27 +121,27 @@ export default function MindTrace() {
                 type="monotone"
                 dataKey="hrv"
                 stroke="var(--chart-hrv)"
-                strokeWidth={2.5}
-                dot={{ fill: "var(--chart-hrv)", r: 4, strokeWidth: 0 }}
-                activeDot={{ r: 6, fill: "var(--chart-hrv-strong)" }}
+                strokeWidth={3}
+                dot={{ fill: "var(--chart-hrv)", r: 5, strokeWidth: 0 }}
+                activeDot={{ r: 7, fill: "var(--chart-hrv-strong)" }}
               />
             </LineChart>
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="Daily Steps" subtitle="Step count">
+        <ChartCard title="Daily Steps" subtitle="Step count" emoji="🚶">
           <ResponsiveContainer width="100%" height={140}>
-            <BarChart data={stepsData} barSize={20}>
+            <BarChart data={stepsData} barSize={18}>
               <CartesianGrid vertical={false} />
               <XAxis dataKey="day" axisLine={false} tickLine={false} />
               <YAxis domain={[0, 12000]} axisLine={false} tickLine={false} width={36} />
               <Tooltip content={<CustomTooltip unit=" steps" />} />
-              <Bar dataKey="steps" fill="var(--chart-steps)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="steps" fill="var(--chart-steps)" radius={[10, 10, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="Depression Score (Estimated)" subtitle="PHQ-9 - lower is better">
+        <ChartCard title="Depression Score (Estimated)" subtitle="PHQ-9 — lower is better" emoji="🧠">
           <ResponsiveContainer width="100%" height={140}>
             <LineChart data={phqData}>
               <CartesianGrid vertical={false} />
@@ -155,9 +152,9 @@ export default function MindTrace() {
                 type="monotone"
                 dataKey="score"
                 stroke="var(--chart-phq)"
-                strokeWidth={2.5}
-                dot={{ fill: "var(--chart-phq)", r: 4, strokeWidth: 0 }}
-                activeDot={{ r: 6, fill: "var(--chart-phq-strong)" }}
+                strokeWidth={3}
+                dot={{ fill: "var(--chart-phq)", r: 5, strokeWidth: 0 }}
+                activeDot={{ r: 7, fill: "var(--chart-phq-strong)" }}
               />
             </LineChart>
           </ResponsiveContainer>
