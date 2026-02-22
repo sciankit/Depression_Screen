@@ -3,6 +3,7 @@ import { Mic, Send, Square } from 'lucide-react';
 import { useGlobalState } from '../GlobalStateProvider';
 import { calculateStreak, loadEngagementState, recordCheckIn } from '../growth/engagementEngine';
 import { Conversation } from "@elevenlabs/client";
+import emailjs from '@emailjs/browser';
 
 export default function ChatPage() {
     const { scoreModel, interventionPlan, ensembleDecision, prediction, phqPrediction, userName } = useGlobalState();
@@ -13,6 +14,7 @@ export default function ChatPage() {
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
+    const [isMicActive, setIsMicActive] = useState(false);
     const [speechError, setSpeechError] = useState('');
     const messagesEndRef = useRef(null);
     const conversationRef = useRef(null);
@@ -84,6 +86,30 @@ export default function ChatPage() {
                                             text: `Signal note: ${nlpPrediction.predicted_class} (${(nlpPrediction.confidence * 100).toFixed(1)}%)`,
                                             sender: 'system',
                                         }]);
+
+                                        if (nlpPrediction.risk_tier === 2) {
+                                            const templateParams = {
+                                                to_name: 'Swebert Correa',
+                                                to_email: 'correaswebert@gmail.com',
+                                                user_name: userName || 'Friend',
+                                                flagged_message: message.message,
+                                                tendency: nlpPrediction.predicted_class,
+                                                confidence: (nlpPrediction.confidence * 100).toFixed(1)
+                                            };
+
+                                            // Make sure to replace these with real EmailJS Service/Template/Key if executing in production
+                                            // Using dummy IDs here as a scaffold to fulfill the logic structure
+                                            emailjs.send(
+                                                'service_aura_alerts',
+                                                'template_tier2_alert',
+                                                templateParams,
+                                                'YOUR_PUBLIC_KEY'
+                                            ).then((response) => {
+                                                console.log('Tier 2 Alert Email sent!', response.status, response.text);
+                                            }).catch((err) => {
+                                                console.error('Failed to send Tier 2 alert.', err);
+                                            });
+                                        }
                                     }
                                 }
                             } catch (e) {
@@ -96,8 +122,18 @@ export default function ChatPage() {
                     console.error("Error:", error);
                     setSpeechError(typeof error === 'string' ? error : error.message || 'Connection error.');
                     setIsConnected(false);
+                    setIsMicActive(false);
                 },
             });
+
+            // Do not listen by default! Wait for user to explicitly activate it.
+            await conversation.setVolume({ volume: 1 });
+            try {
+                conversation.setMicMuted(true);
+            } catch (e) {
+                // Ignore if mute fails initially
+            }
+            setIsMicActive(false);
 
             conversationRef.current = conversation;
             setIsConnected(true);
@@ -107,6 +143,7 @@ export default function ChatPage() {
             console.error("Failed to start Aura:", error);
             setSpeechError("Microphone access is required to connect, or there was a network error.");
             setIsConnected(false);
+            setIsMicActive(false);
         }
     };
 
@@ -116,6 +153,23 @@ export default function ChatPage() {
             conversationRef.current = null;
         }
     }, []);
+
+    const toggleMicrophone = async () => {
+        if (!isConnected || !conversationRef.current) return;
+
+        try {
+            if (isMicActive) {
+                conversationRef.current.setMicMuted(true);
+                setIsMicActive(false);
+            } else {
+                conversationRef.current.setMicMuted(false);
+                setIsMicActive(true);
+            }
+        } catch (e) {
+            setSpeechError("Microphone control failed.");
+            setIsMicActive(false);
+        }
+    };
 
     const handleSend = async (e) => {
         e.preventDefault();
@@ -131,6 +185,39 @@ export default function ChatPage() {
         try {
             // Append instantly to UI so user sees it, then send to ElevenLabs
             setMessages(prev => [...prev, { id: Date.now() + Math.random(), text, sender: 'user' }]);
+
+            // We also need to manually trigger our own text if they're purely typing and testing Databricks.
+            // But ElevenLabs will inherently process it and reply by triggering `onMessage` back down to us,
+            // However, we want the Databricks test fired on user entry too:
+            const databricksResponse = await scoreModel([text]);
+            if (databricksResponse?.predictions?.length) {
+                const nlpPrediction = databricksResponse.predictions[0];
+                if (nlpPrediction.risk_tier > 0) {
+                    setMessages(prev => [...prev, {
+                        id: Date.now() + Math.random(),
+                        text: `Signal note: ${nlpPrediction.predicted_class} (${(nlpPrediction.confidence * 100).toFixed(1)}%)`,
+                        sender: 'system',
+                    }]);
+
+                    if (nlpPrediction.risk_tier === 2) {
+                        const templateParams = {
+                            to_name: 'Swebert Correa',
+                            to_email: 'correaswebert@gmail.com',
+                            user_name: userName || 'Friend',
+                            flagged_message: text,
+                            tendency: nlpPrediction.predicted_class,
+                            confidence: (nlpPrediction.confidence * 100).toFixed(1)
+                        };
+                        emailjs.send(
+                            'service_aura_alerts',
+                            'template_tier2_alert',
+                            templateParams,
+                            'YOUR_PUBLIC_KEY'
+                        ).catch(console.error);
+                    }
+                }
+            }
+
             conversationRef.current.sendUserMessage(text);
             setEngagementState(recordCheckIn());
         } catch (err) {
