@@ -53,16 +53,16 @@ const CustomTooltip = ({ active, payload, label, unit }) => {
   if (active && payload && payload.length) {
     return (
       <div style={{
-        background: "#fff",
-        border: "1px solid #e2ddd6",
+        background: "var(--surface-strong)",
+        border: "1px solid var(--color-border)",
         borderRadius: 8,
         padding: "8px 14px",
         fontSize: 12,
-        color: "#3d3530",
-        boxShadow: "0 4px 16px rgba(0,0,0,0.06)"
+        color: "var(--color-ink)",
+        boxShadow: "var(--card-shadow)"
       }}>
         <div style={{ fontWeight: 600, marginBottom: 2 }}>{label}</div>
-        <div style={{ color: "#7c6f64" }}>{payload[0].value}{unit}</div>
+        <div style={{ color: "var(--color-muted)" }}>{payload[0].value}{unit}</div>
       </div>
     );
   }
@@ -72,17 +72,17 @@ const CustomTooltip = ({ active, payload, label, unit }) => {
 // ── CHART CARD ────────────────────────────────────────────────────────────────
 const ChartCard = ({ title, subtitle, children }) => (
   <div style={{
-    background: "#fff",
-    border: "1px solid #e8e3db",
+    background: "var(--surface-strong)",
+    border: "1px solid var(--color-border)",
     borderRadius: 16,
     padding: "24px 24px 16px",
     flex: 1,
     minWidth: 260,
   }}>
-    <div style={{ marginBottom: 4, fontSize: 13, fontWeight: 600, color: "#2c2420", letterSpacing: "-0.2px" }}>
+    <div style={{ marginBottom: 4, fontSize: 13, fontWeight: 600, color: "var(--color-ink)", letterSpacing: "-0.2px" }}>
       {title}
     </div>
-    <div style={{ marginBottom: 20, fontSize: 11, color: "#a89e94" }}>{subtitle}</div>
+    <div style={{ marginBottom: 20, fontSize: 11, color: "var(--color-muted)" }}>{subtitle}</div>
     {children}
   </div>
 );
@@ -150,7 +150,7 @@ export default function MindTrace() {
     error: "Something went wrong",
   }[status];
 
-  const btnColor = status === "error" ? "#c0392b" : status === "playing" ? "#5a4a3a" : "#2c2420";
+  const btnColor = status === "error" ? "#c0392b" : status === "playing" ? "var(--color-ink)" : "var(--color-primary)";
 
   return (
     <div style={{
@@ -161,8 +161,8 @@ export default function MindTrace() {
 
       {/* Styles */}
       <style>{`
-        .recharts-cartesian-axis-tick-value { font-size: 11px; fill: #a89e94; }
-        .recharts-cartesian-grid line { stroke: #f0ebe3; }
+        .recharts-cartesian-axis-tick-value { font-size: 11px; fill: var(--color-muted); }
+        .recharts-cartesian-grid line { stroke: var(--color-border); }
         @keyframes pulse-ring {
           0% { transform: scale(0.95); opacity: 0.6; }
           70% { transform: scale(1.08); opacity: 0; }
@@ -175,13 +175,13 @@ export default function MindTrace() {
 
       {/* Header */}
       <div style={{ maxWidth: 900, margin: "0 auto 40px" }}>
-        <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "#b0a498", textTransform: "uppercase", marginBottom: 8 }}>
+        <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "var(--color-muted)", textTransform: "uppercase", marginBottom: 8 }}>
           Weekly Report · Feb 15 – 21, 2026
         </div>
-        <h1 className="display" style={{ fontSize: 32, fontWeight: 500, color: "#1e1712", letterSpacing: "-0.5px", margin: 0 }}>
+        <h1 className="display" style={{ fontSize: 32, fontWeight: 500, color: "var(--color-ink)", letterSpacing: "-0.5px", margin: 0 }}>
           Your Wellbeing at a Glance
         </h1>
-        <p style={{ marginTop: 8, fontSize: 14, color: "#8a7d74", lineHeight: 1.6, maxWidth: 520 }}>
+        <p style={{ marginTop: 8, fontSize: 14, color: "var(--color-muted)", lineHeight: 1.6, maxWidth: 520 }}>
           Passive signals from your wearable and phone, summarized for the week.
           Mid-week showed strain — the weekend brought recovery.
         </p>
@@ -260,15 +260,15 @@ export default function MindTrace() {
       <div style={{
         maxWidth: 900,
         margin: "0 auto 40px",
-        background: "#fff",
-        border: "1px solid #e8e3db",
+        background: "var(--surface-strong)",
+        border: "1px solid var(--color-border)",
         borderRadius: 16,
         padding: "24px 28px",
       }}>
-        <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#b0a498", marginBottom: 10 }}>
+        <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-muted)", marginBottom: 10 }}>
           Weekly Insight
         </div>
-        <p className="display" style={{ fontSize: 16, color: "#3d3530", lineHeight: 1.8, margin: 0, fontWeight: 400 }}>
+        <p className="display" style={{ fontSize: 16, color: "var(--color-ink)", lineHeight: 1.8, margin: 0, fontWeight: 400 }}>
           {INSIGHT_TEXT}
         </p>
       </div>
@@ -281,7 +281,7 @@ export default function MindTrace() {
               position: "absolute",
               width: "100%", height: "100%",
               borderRadius: 50,
-              background: "#2c2420",
+              background: "var(--color-primary)",
               animation: "pulse-ring 1.8s ease-out infinite",
               pointerEvents: "none",
             }} />
@@ -292,7 +292,7 @@ export default function MindTrace() {
             style={{
               position: "relative",
               background: btnColor,
-              color: "#f7f4ef",
+              color: "#ffffff",
               border: "none",
               borderRadius: 50,
               padding: "14px 28px",
@@ -310,7 +310,7 @@ export default function MindTrace() {
             {status === "loading" && (
               <span style={{
                 width: 12, height: 12,
-                border: "2px solid rgba(255,255,255,0.3)",
+                border: "2px solid rgba(255,255,255,0.35)",
                 borderTopColor: "#fff",
                 borderRadius: "50%",
                 display: "inline-block",
@@ -321,8 +321,8 @@ export default function MindTrace() {
           </button>
         </div>
 
-        <div style={{ fontSize: 12, color: "#b0a498", lineHeight: 1.5 }}>
-          Powered by <span style={{ color: "#7c6f64", fontWeight: 500 }}>ElevenLabs</span>
+        <div style={{ fontSize: 12, color: "var(--color-muted)", lineHeight: 1.5 }}>
+          Powered by <span style={{ color: "var(--color-ink)", fontWeight: 500 }}>ElevenLabs</span>
           <br />Calm, natural voice summary
         </div>
       </div>
