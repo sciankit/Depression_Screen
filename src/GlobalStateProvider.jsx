@@ -38,6 +38,9 @@ export function GlobalStateProvider({ children }) {
     const [interventionPlan, setInterventionPlan] = useState(null);
     const [explainability, setExplainability] = useState([]);
     const [isScoring, setIsScoring] = useState(true);
+    const [userName, setUserName] = useState("Eric");
+    const [selectedVoiceAgentId, setSelectedVoiceAgentId] = useState(import.meta.env.VITE_ELEVENLABS_COMPANION_AGENT_ID);
+    const [selectedTextAgentId, setSelectedTextAgentId] = useState(import.meta.env.VITE_ELEVENLABS_TEXTCOMPANION_AGENT_ID);
 
     useEffect(() => {
         if (prediction && (phqPrediction !== null && phqPrediction !== undefined)) {
@@ -50,6 +53,20 @@ export function GlobalStateProvider({ children }) {
             setEnsembleDecision(decision);
             setInterventionPlan(buildInterventionPlan(decision, prediction, phqPrediction));
             setExplainability(buildExplainabilitySummary(prediction));
+
+            let voiceAgentId = import.meta.env.VITE_ELEVENLABS_COMPANION_AGENT_ID;
+            let textAgentId = import.meta.env.VITE_ELEVENLABS_TEXTCOMPANION_AGENT_ID;
+
+            if (decision.tier === 2) {
+                voiceAgentId = import.meta.env.VITE_ELEVENLABS_RESPONDER_AGENT_ID;
+                textAgentId = import.meta.env.VITE_ELEVENLABS_RESPONDER_AGENT_ID;
+            } else if (decision.tier === 1) {
+                voiceAgentId = import.meta.env.VITE_ELEVENLABS_COACH_AGENT_ID;
+                textAgentId = import.meta.env.VITE_ELEVENLABS_COACH_AGENT_ID;
+            }
+
+            setSelectedVoiceAgentId(voiceAgentId);
+            setSelectedTextAgentId(textAgentId);
         }
     }, [prediction, phqPrediction]);
 
@@ -175,6 +192,10 @@ export function GlobalStateProvider({ children }) {
             isScoring,
             scoreModel,
             scorePhqModel,
+            selectedVoiceAgentId,
+            selectedTextAgentId,
+            userName,
+            setUserName,
         }}>
             {children}
         </GlobalStateContext.Provider>
