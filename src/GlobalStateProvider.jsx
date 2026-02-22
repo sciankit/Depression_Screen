@@ -54,8 +54,8 @@ export function GlobalStateProvider({ children }) {
             setInterventionPlan(buildInterventionPlan(decision, prediction, phqPrediction));
             setExplainability(buildExplainabilitySummary(prediction));
 
-            let voiceAgentId = import.meta.env.VITE_ELEVENLABS_COMPANION_AGENT_ID;
-            let textAgentId = import.meta.env.VITE_ELEVENLABS_TEXTCOMPANION_AGENT_ID;
+            let voiceAgentId = import.meta.env.VITE_ELEVENLABS_COACH_AGENT_ID;
+            let textAgentId = import.meta.env.VITE_ELEVENLABS_COACH_AGENT_ID;
 
             if (decision.tier === 2) {
                 voiceAgentId = import.meta.env.VITE_ELEVENLABS_RESPONDER_AGENT_ID;

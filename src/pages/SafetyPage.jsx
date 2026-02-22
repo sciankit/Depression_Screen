@@ -5,7 +5,7 @@ import SafetyEscalationConsole from '../components/SafetyEscalationConsole';
 
 export default function SafetyPage() {
     const { interventionPlan, ensembleDecision, isScoring } = useGlobalState();
-    const tier = interventionPlan?.tier ?? ensembleDecision?.tier ?? 0;
+    const tier = 2//interventionPlan?.tier ?? ensembleDecision?.tier ?? 0;
     const info = RISK_TIERS[tier] || RISK_TIERS[0];
 
     return (
@@ -40,20 +40,6 @@ export default function SafetyPage() {
                 <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '14px' }}>
                     Reason: {isScoring ? 'Analyzing live signals...' : (interventionPlan?.reason || ensembleDecision?.reason || 'Awaiting model output')}
                 </p>
-            </section>
-
-            <section className="card" style={{ marginBottom: '16px' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '12px', fontSize: '18px' }}><span className="section-icon">🌱</span>Recommended Actions</h3>
-                {(interventionPlan?.interventions || [
-                    'Collect more baseline data to personalize guidance.',
-                    'Use chat journaling to detect trend shifts.',
-                    'Enable trusted-contact preferences.',
-                ]).map((step, idx) => (
-                    <div key={idx} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'flex-start' }}>
-                        <span style={{ fontSize: '16px' }}>{['🌸', '📓', '🤝'][idx] || '✨'}</span>
-                        <span style={{ lineHeight: 1.6, fontSize: '14px' }}>{step}</span>
-                    </div>
-                ))}
             </section>
 
             <section className="card">

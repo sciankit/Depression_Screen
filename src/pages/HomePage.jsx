@@ -41,7 +41,7 @@ const TODAY_TASKS = [
 
 export default function HomePage() {
     const navigate = useNavigate();
-    const { prediction, phqPrediction, isScoring, interventionPlan, ensembleDecision } = useGlobalState();
+    const { prediction, phqPrediction, isScoring, interventionPlan, ensembleDecision, userName } = useGlobalState();
     const [status, setStatus] = useState('idle');
     const audioRef = useRef(null);
 
@@ -52,7 +52,7 @@ export default function HomePage() {
         if (status === 'loading' || status === 'playing') return;
         setStatus('loading');
 
-        let promptText = "Hey, I'm here with you. We can do a quick check-in or just breathe together for a minute.";
+        let promptText = "Let's start with the book: Why Has Nobody Told Me This Before? By DR JULIE SMITH CHAPTER 1: Understanding low mood Everyone has low days. Everyone. But we all dier in how frequent the low days are and how severe the low mood.";
         if (prediction || phqPrediction) {
             const insights = [];
             if (prediction?.risk_tier > 0) insights.push(prediction.predicted_class);
@@ -105,7 +105,7 @@ export default function HomePage() {
     const listenLabel = isScoring
         ? 'Analyzing...'
         : status === 'idle'
-            ? 'Listen First'
+            ? 'Hear audiobook'
             : status === 'loading'
                 ? 'Generating...'
                 : status === 'playing'
@@ -119,15 +119,15 @@ export default function HomePage() {
                     <span style={{ width: 8, height: 8, borderRadius: 99, background: riskMeta.color }} />
                     {riskMeta.label} support
                 </div>
-                <h1 className="display home-daily-title"><span className="section-icon-lg">🧘</span>Daily Check-in</h1>
+                <h1 className="display home-daily-title"><span className="section-icon-lg">🧘</span>Hi there {userName}</h1>
                 <p className="home-daily-subtitle">Take 2 minutes to talk with your mindful companion about your day.</p>
 
                 <div className="home-daily-actions">
                     <button className="home-daily-btn" onClick={() => navigate('/chat')}>
-                        <MessageCircle size={14} /> Text Chat
+                        <MessageCircle size={14} /> Chat with me
                     </button>
                     <button className="home-daily-btn" onClick={() => navigate('/chat')}>
-                        <PhoneCall size={14} /> Voice Call
+                        <PhoneCall size={14} /> Talk to me
                     </button>
                     <button className="home-daily-btn home-daily-btn-solid" onClick={status === 'playing' ? stopPrompt : playPrompt} disabled={isScoring}>
                         {isScoring && <Loader size={14} className="animate-spin" />}

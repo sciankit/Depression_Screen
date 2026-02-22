@@ -13,6 +13,7 @@ export default function ChatPage() {
     const [engagementState, setEngagementState] = useState(() => loadEngagementState());
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [isListening, setIsListening] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [isMicActive, setIsMicActive] = useState(false);
     const [speechError, setSpeechError] = useState('');
@@ -52,13 +53,13 @@ export default function ChatPage() {
 
             // Map tier to agent IDs directly
             const agentIds = {
-                0: import.meta.env.VITE_ELEVENLABS_COMPANION_AGENT_ID,
+                0: import.meta.env.VITE_ELEVENLABS_COACH_AGENT_ID,
                 1: import.meta.env.VITE_ELEVENLABS_COACH_AGENT_ID,
                 2: import.meta.env.VITE_ELEVENLABS_RESPONDER_AGENT_ID
             };
 
             const conversation = await Conversation.startSession({
-                agentId: agentIds[tier] || import.meta.env.VITE_ELEVENLABS_COMPANION_AGENT_ID,
+                agentId: agentIds[tier] || import.meta.env.VITE_ELEVENLABS_COACH_AGENT_ID,
                 dynamicVariables: {
                     user_name: userName || "Friend",
                     nlp_class: prediction?.predicted_class || "Neutral",
@@ -66,6 +67,7 @@ export default function ChatPage() {
                 },
                 onModeChange: (mode) => {
                     setIsTyping(mode.mode === 'speaking');
+                    setIsListening(mode.mode === 'listening');
                 },
                 onMessage: async (message) => {
                     if (message.message) {
@@ -140,7 +142,7 @@ export default function ChatPage() {
             setEngagementState(recordCheckIn());
 
         } catch (error) {
-            console.error("Failed to start Aura:", error);
+            console.error("Failed to start MoodLens:", error);
             setSpeechError("Microphone access is required to connect, or there was a network error.");
             setIsConnected(false);
             setIsMicActive(false);
@@ -260,6 +262,16 @@ export default function ChatPage() {
                             </div>
                         );
                     })}
+
+                    {isListening && (
+                        <div className="chat-row chat-row-user">
+                            <div className="chat-bubble chat-bubble-user" style={{ display: 'flex', alignItems: 'center', gap: '4px', minHeight: '38px' }}>
+                                <span className="chat-typing-dot" style={{ background: 'currentColor', animationDelay: '0s' }} />
+                                <span className="chat-typing-dot" style={{ background: 'currentColor', animationDelay: '0.2s' }} />
+                                <span className="chat-typing-dot" style={{ background: 'currentColor', animationDelay: '0.4s' }} />
+                            </div>
+                        </div>
+                    )}
 
                     {isTyping && (
                         <div className="chat-typing">

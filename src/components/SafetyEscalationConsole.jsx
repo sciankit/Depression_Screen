@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 const STORAGE_KEY = 'MoodLens_safety_preferences_v1';
 
 const DEFAULT_CONTACTS = [
-    { id: 1, name: 'Alex (Sibling)', channel: 'SMS', value: '+1-555-0101' },
+    { id: 1, name: 'Swebert (Sibling)', channel: 'Email', value: 'correaswebert@gmail.com' },
     { id: 2, name: 'Dr. Rivera (Therapist)', channel: 'Call', value: '+1-555-0123' },
 ];
 

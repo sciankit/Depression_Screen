@@ -78,7 +78,7 @@ export default function PlanPage() {
     ? SCREENING_QUESTIONS[screeningState.currentQuestionId]
     : null;
   const screeningMeta = RISK_TIERS[screeningSummary.tier] || RISK_TIERS[0];
-  const progress = Math.min(100, Math.round((screeningState.answers.length / 6) * 100));
+  const progress = screeningState.completed ? 100 : Math.min(100, Math.round((screeningState.answers.length / 5) * 100));
 
   const effectiveTier = Math.max(baseTier, screeningSummary.tier);
   const effectiveMeta = RISK_TIERS[effectiveTier] || RISK_TIERS[0];

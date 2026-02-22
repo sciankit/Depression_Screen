@@ -236,48 +236,57 @@ const styles = `
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 const MOCK_USER = {
     id: "USR-004821",
-    name: "Alex M.",
+    name: "Eric M.",
     age: 28,
-    assignedClinicianId: "DR-Reyes",
+    assignedClinicianId: "Dr. Rivera",
     location: "Chicago, IL",
-    enrolled: "2024-09-10",
+    enrolled: "2026-02-21",
 };
 
 const PHQ_HISTORY = [
-    { date: "Jan 28", score: 11 },
-    { date: "Feb 04", score: 14 },
-    { date: "Feb 11", score: 17 },
-    { date: "Feb 18", score: 20 },
+    { date: "Feb 14", score: 11 },
+    { date: "Feb 17", score: 14 },
+    { date: "Feb 20", score: 17 },
+    { date: "Feb 21", score: 20 },
     { date: "Feb 21", score: 23 },
 ];
 
 const CONCERNING_MESSAGES = [
     {
         content: "I don't see any point in continuing. Nothing I do seems to matter.",
-        timestamp: "Feb 21, 09:12",
-        sentimentScore: -0.94,
-        flags: ["hopelessness", "passive-ideation"],
+        timestamp: "Feb 22, 00:11",
+        sentimentScore: 0.989,
+        flags: ["suicide"],
         level: "high",
     },
     {
-        content: "I've been isolating myself. Can't bring myself to talk to anyone.",
-        timestamp: "Feb 20, 22:45",
-        sentimentScore: -0.78,
-        flags: ["social-withdrawal"],
-        level: "med",
+        content: "I've not been feeling like myself lately. I feel like I'm losing interest in things I used to enjoy.",
+        timestamp: "Feb 22, 00:10",
+        sentimentScore: 0.92,
+        flags: ["depression"],
+        level: "moderate",
     },
     {
-        content: "What would people think if I just disappeared?",
-        timestamp: "Feb 20, 19:30",
-        sentimentScore: -0.91,
-        flags: ["suicidal-ideation", "disappearance"],
-        level: "high",
+        content: "I don't have the energy to do anything. I just want to sleep all day.",
+        timestamp: "Feb 22, 00:09",
+        sentimentScore: 0.74,
+        flags: ["depression"],
+        level: "moderate",
     },
+    {
+        content: "Love you mom.",
+        timestamp: "Feb 21, 10:00",
+        sentimentScore: 0.74,
+        flags: ["neutral"],
+        level: "low",
+    },
+
 ];
 
 const CONTACTS = [
-    { name: "Dr. Sofia Reyes", role: "Assigned Clinician", initials: "SR", color: "#7C3AED", bg: "#7C3AED22" },
-    { name: "Jordan M.", role: "Emergency Contact · Sibling", initials: "JM", color: "#0EA5E9", bg: "#0EA5E922" },
+    { name: "Dr. Rivera", role: "Assigned Clinician", initials: "DR", color: "#7C3AED", bg: "#7C3AED22" },
+    { name: "Mom", role: "Emergency Contact · Parent", initials: "M", color: "#0EA5E9", bg: "#0EA5E922" },
+    { name: "Swebert", role: "Emergency Contact · Sibling", initials: "SC", color: "#0EA5E9", bg: "#0EA5E922" },
     { name: "Crisis Line Operator", role: "988 Suicide & Crisis Lifeline", initials: "CL", color: "#10B981", bg: "#10B98122" },
 ];
 
@@ -390,7 +399,7 @@ export default function PHQAlertSystem() {
                     <div className="header-icon">🚨</div>
                     <div>
                         <div className="header-title">⬤ Critical Mental Health Alert</div>
-                        <div className="header-sub">PHQ-9 Severe Risk Detected — Immediate Action Required</div>
+                        <div className="header-sub">Severe Risk Detected — Immediate Action Required</div>
                     </div>
                     <div className="header-ts">
                         <div>ALERT ID</div>
@@ -408,13 +417,13 @@ export default function PHQAlertSystem() {
                 <div className="grid">
                     {/* PHQ Score */}
                     <div className="panel">
-                        <div className="panel-head"><span className="dot" />PHQ-9 Assessment</div>
+                        <div className="panel-head"><span className="dot" />PHQ Assessment</div>
                         <div className="panel-body">
                             <div className="score-wrap">
-                                <div className="score-num">{currentScore}</div>
+                                <div className="score-num">{22}</div>
                                 <div className="score-meta">
-                                    <div className="score-label">Score / 27</div>
-                                    <div className="score-badge">{riskBadge}</div>
+                                    <div className="score-label">/ 27</div>
+                                    <div className="score-badge">CRITICAL</div>
                                 </div>
                             </div>
                             <div className="score-label" style={{ marginBottom: 8 }}>5-Week Trend</div>

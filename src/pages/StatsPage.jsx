@@ -1,4 +1,4 @@
-import MoodLens from '../MindTrace';
+import MoodLens from '../MoodLens';
 import ExplainabilityPanel from '../components/ExplainabilityPanel';
 
 export default function StatsPage() {

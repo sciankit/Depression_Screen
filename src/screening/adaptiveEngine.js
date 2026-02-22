@@ -122,10 +122,7 @@ export function summarizeScreening(answers) {
 
   let tier = 0;
   let label = 'Low';
-  if (totals.safetyFlag || totals.score >= 8) {
-    tier = 2;
-    label = 'Critical';
-  } else if (totals.score >= 4) {
+  if (totals.score >= 4) {
     tier = 1;
     label = 'Moderate';
   }

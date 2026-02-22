@@ -52,18 +52,20 @@ export default function Layout() {
                 <Outlet />
             </main>
 
-            <nav className="dock-nav">
-                {navItems.map((item) => (
-                    <NavLink
-                        key={item.path}
-                        to={item.path}
-                        className={({ isActive }) => `dock-link${isActive ? ' active' : ''}`}
-                    >
-                        <item.icon size={20} />
-                        <span>{item.name}</span>
-                    </NavLink>
-                ))}
-            </nav>
+            {location.pathname !== '/dev' && (
+                <nav className="dock-nav">
+                    {navItems.map((item) => (
+                        <NavLink
+                            key={item.path}
+                            to={item.path}
+                            className={({ isActive }) => `dock-link${isActive ? ' active' : ''}`}
+                        >
+                            <item.icon size={20} />
+                            <span>{item.name}</span>
+                        </NavLink>
+                    ))}
+                </nav>
+            )}
         </div>
     );
 }
