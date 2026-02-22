@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import {
+    Activity,
     Flame,
     HeartPulse,
     Loader,
@@ -24,6 +25,24 @@ const QUICK_ACTIONS = [
     { label: 'Story', route: '/stats' },
 ];
 
+function clamp(value, min = 0, max = 100) {
+    return Math.max(min, Math.min(max, value));
+}
+
+function buildSignalModel(riskTier, streak) {
+    const sleep = clamp(82 - riskTier * 19 + streak * 2);
+    const stress = clamp(28 + riskTier * 26 - streak * 2);
+    const social = clamp(68 - riskTier * 13 + streak * 3);
+    const readiness = clamp(Math.round((sleep + (100 - stress) + social) / 3));
+
+    return {
+        sleep,
+        stress,
+        social,
+        readiness,
+    };
+}
+
 export default function HomePage() {
     const navigate = useNavigate();
     const { prediction, phqPrediction, isScoring, interventionPlan, ensembleDecision } = useGlobalState();
@@ -41,6 +60,19 @@ export default function HomePage() {
         if (riskTier === 1) return 'Recover';
         return 'Maintain';
     }, [riskTier]);
+
+    const signals = useMemo(() => buildSignalModel(riskTier, streak), [riskTier, streak]);
+
+    const todayPlan = useMemo(() => {
+        if (interventionPlan?.interventions?.length) {
+            return interventionPlan.interventions.slice(0, 3);
+        }
+        return [
+            'Quick 2-minute mood check-in',
+            'Run adaptive plan refresh',
+            'Review care settings in one tap',
+        ];
+    }, [interventionPlan]);
 
     const playPrompt = async () => {
         if (status === 'loading' || status === 'playing') return;
@@ -113,11 +145,12 @@ export default function HomePage() {
                 <div className="home-orb home-orb-b" />
 
                 <div style={{ position: 'relative', zIndex: 2 }}>
-                    <div className="chip" style={{ marginBottom: '10px', color: riskMeta.color }}>
-                        <ShieldAlert size={13} /> {riskMeta.label} support mode
+                    <div className="chip" style={{ marginBottom: '10px' }}>
+                        <span style={{ width: 8, height: 8, borderRadius: 99, background: riskMeta.color }} />
+                        {riskMeta.label} support mode
                     </div>
 
-                    <h1 className="display home-minimal-title">Today, one clear next step.</h1>
+                    <h1 className="display home-minimal-title">Fresh start. Useful next step.</h1>
 
                     <div className="home-chip-row" style={{ marginBottom: '12px' }}>
                         <div className="chip"><Orbit size={13} /> {streak}d streak</div>
@@ -140,7 +173,47 @@ export default function HomePage() {
                 </div>
             </section>
 
-            <section className="home-action-rail reveal-2">
+            <section className="home-signal-grid reveal-2">
+                <div className="card home-signal-card">
+                    <div className="home-signal-ring" style={{ '--ring': `${signals.readiness * 3.6}deg` }}>
+                        <div className="home-signal-ring-inner">
+                            <div className="home-mini-label">Readiness</div>
+                            <div className="home-ring-value">{signals.readiness}</div>
+                        </div>
+                    </div>
+                    <div className="home-mini-bars">
+                        <div className="home-bar-row">
+                            <span>Sleep</span>
+                            <div className="home-bar-track"><div className="home-bar-fill" style={{ width: `${signals.sleep}%` }} /></div>
+                        </div>
+                        <div className="home-bar-row">
+                            <span>Stress</span>
+                            <div className="home-bar-track"><div className="home-bar-fill stress" style={{ width: `${signals.stress}%` }} /></div>
+                        </div>
+                        <div className="home-bar-row">
+                            <span>Social</span>
+                            <div className="home-bar-track"><div className="home-bar-fill" style={{ width: `${signals.social}%` }} /></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card home-plan-card">
+                    <div className="home-mini-label" style={{ marginBottom: 8 }}>Today Plan</div>
+                    <div style={{ display: 'grid', gap: 8, marginBottom: 10 }}>
+                        {todayPlan.map((item, idx) => (
+                            <div key={item} className="home-plan-item">
+                                <span>{idx + 1}</span>
+                                <p>{item}</p>
+                            </div>
+                        ))}
+                    </div>
+                    <button className="chip" onClick={() => navigate('/plan')}>
+                        <Activity size={12} /> Refine plan
+                    </button>
+                </div>
+            </section>
+
+            <section className="home-action-rail reveal-3">
                 {QUICK_ACTIONS.map((item, index) => (
                     <button
                         key={item.label}
@@ -152,14 +225,6 @@ export default function HomePage() {
                         {item.label}
                     </button>
                 ))}
-            </section>
-
-            <section className="card reveal-3" style={{ textAlign: 'center' }}>
-                <div className="home-mini-label" style={{ marginBottom: '6px' }}>Quick Goal</div>
-                <div className="home-metric" style={{ marginBottom: '2px' }}>3 min reset</div>
-                <p className="text-muted" style={{ margin: 0, fontSize: '13px' }}>
-                    Talk, plan, and continue your day.
-                </p>
             </section>
         </div>
     );
