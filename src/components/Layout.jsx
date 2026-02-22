@@ -23,19 +23,21 @@ export default function Layout() {
 
     return (
         <div className="app-shell">
-            <div className="top-ribbon">
-                <div className="brand-mark">MindTrace</div>
-                <button
-                    type="button"
-                    className="chip"
-                    onClick={() => setTheme((value) => (value === 'light' ? 'dark' : 'light'))}
-                >
-                    {theme === 'light' ? <Moon size={13} /> : <Sun size={13} />}
-                    {theme === 'light' ? 'Dark' : 'Light'} mode
-                </button>
+            <div className="top-ribbon-wrap">
+                <div className="top-ribbon">
+                    <div className="brand-mark">MindTrace</div>
+                    <button
+                        type="button"
+                        className="chip"
+                        onClick={() => setTheme((value) => (value === 'light' ? 'dark' : 'light'))}
+                    >
+                        {theme === 'light' ? <Moon size={13} /> : <Sun size={13} />}
+                        {theme === 'light' ? 'Dark' : 'Light'} mode
+                    </button>
+                </div>
             </div>
 
-            <main style={{ minHeight: '100vh' }}>
+            <main className="app-main">
                 <Outlet />
             </main>
 

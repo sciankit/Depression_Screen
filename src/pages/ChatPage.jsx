@@ -7,7 +7,7 @@ import { calculateStreak, getNudgeForRiskTier, loadEngagementState, recordCheckI
 export default function ChatPage() {
     const { scoreModel, interventionPlan, ensembleDecision, prediction } = useGlobalState();
     const [messages, setMessages] = useState([
-        { id: 1, text: "Hey, I’m here. Want to name your mood in one sentence?", sender: 'bot' }
+        { id: 1, text: 'Hey, I’m here. Want to name your mood in one sentence?', sender: 'bot' }
     ]);
     const [engagementState, setEngagementState] = useState(() => loadEngagementState());
     const [input, setInput] = useState('');
@@ -33,15 +33,15 @@ export default function ChatPage() {
         setIsTyping(true);
 
         setTimeout(() => {
-            let reply = "I’m with you. Let’s take this one breath at a time.";
+            let reply = 'I’m with you. Let’s take this one breath at a time.';
             if (input.toLowerCase().includes('stressed') || input.toLowerCase().includes('tired')) {
-                reply = "That sounds heavy. Try loosening your shoulders and taking three slow breaths with me.";
+                reply = 'That sounds heavy. Try loosening your shoulders and taking three slow breaths with me.';
             } else if (input.toLowerCase().includes('good') || input.toLowerCase().includes('great')) {
-                reply = "Love that. Let’s lock in this momentum with one small win before tonight.";
+                reply = 'Love that. Let’s lock in this momentum with one small win before tonight.';
             } else if (tier >= 2) {
-                reply = "Thanks for sharing honestly. I want you to open your Care page now so we can bring in support quickly.";
+                reply = 'Thanks for sharing honestly. I want you to open your Care page now so we can bring in support quickly.';
             } else if (tier === 1) {
-                reply = "I’m seeing elevated pressure patterns. A short walk and one trusted check-in can help shift this.";
+                reply = 'I’m seeing elevated pressure patterns. A short walk and one trusted check-in can help shift this.';
             }
             setMessages((prev) => [...prev, { id: Date.now() + 1, text: reply, sender: 'bot' }]);
             setIsTyping(false);
@@ -66,14 +66,8 @@ export default function ChatPage() {
     };
 
     return (
-        <div className="screen-wrap animate-fade-in" style={{ maxWidth: '760px' }}>
-            <div
-                className="card"
-                style={{
-                    marginBottom: '12px',
-                    background: 'linear-gradient(132deg, rgba(10,143,123,0.18) 0%, rgba(255,208,95,0.24) 54%, rgba(255,95,46,0.2) 100%)',
-                }}
-            >
+        <div className="screen-wrap animate-fade-in" style={{ maxWidth: '860px' }}>
+            <div className="card chat-hero" style={{ marginBottom: '12px' }}>
                 <h1 className="display" style={{ fontSize: '30px', marginBottom: '8px' }}>Talk it out, live.</h1>
                 <p className="text-muted" style={{ marginTop: 0, marginBottom: '10px' }}>
                     This space is for real words, not polished answers.
@@ -85,42 +79,33 @@ export default function ChatPage() {
             </div>
 
             {tier >= 1 && (
-                <div className="card" style={{ marginBottom: '12px', border: '1px solid rgba(255,95,46,0.28)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#cb4e1e' }}>
+                <div className="card chat-alert" style={{ marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700 }}>
                         <ShieldAlert size={14} />
                         Elevated pressure pattern detected
                     </div>
                     <p className="text-muted" style={{ marginBottom: 0 }}>
                         You can open your care settings anytime.
-                        <Link to="/safety" style={{ marginLeft: '6px', color: '#cb4e1e', textDecoration: 'underline' }}>Open Care page</Link>
+                        <Link to="/safety" className="chat-alert-link">Open Care page</Link>
                     </p>
                 </div>
             )}
 
             <div className="card" style={{ padding: '12px', marginBottom: '12px' }}>
-                <div style={{ maxHeight: '50vh', overflowY: 'auto', padding: '6px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {messages.map((msg) => (
-                        <div key={msg.id} style={{ alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '82%' }}>
-                            <div
-                                style={{
-                                    padding: msg.sender === 'system' ? '7px 10px' : '12px 14px',
-                                    borderRadius: msg.sender === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                                    background:
-                                        msg.sender === 'user'
-                                            ? 'linear-gradient(135deg, #ff5f2e, #ff7d22)'
-                                            : msg.sender === 'system'
-                                                ? '#fff0ea'
-                                                : 'rgba(255,255,255,0.8)',
-                                    border: msg.sender === 'user' ? 'none' : '1px solid var(--color-border)',
-                                    color: msg.sender === 'user' ? 'white' : msg.sender === 'system' ? '#b2461f' : 'var(--color-ink)',
-                                    fontSize: msg.sender === 'system' ? '12px' : '15px',
-                                    lineHeight: 1.4,
-                                }}
-                            >
-                                {msg.text}
+                <div className="chat-thread">
+                    {messages.map((msg) => {
+                        const bubbleClass = msg.sender === 'user'
+                            ? 'chat-bubble chat-bubble-user'
+                            : msg.sender === 'system'
+                                ? 'chat-bubble chat-bubble-system'
+                                : 'chat-bubble chat-bubble-bot';
+
+                        return (
+                            <div key={msg.id} style={{ alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '82%' }}>
+                                <div className={bubbleClass}>{msg.text}</div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
 
                     {isTyping && (
                         <div style={{ alignSelf: 'flex-start' }}>
@@ -137,15 +122,7 @@ export default function ChatPage() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Drop your thoughts here..."
-                    style={{
-                        flex: 1,
-                        border: '1px solid var(--color-border)',
-                        borderRadius: '999px',
-                        padding: '12px 16px',
-                        outline: 'none',
-                        fontSize: '15px',
-                        fontFamily: 'var(--font-sans)',
-                    }}
+                    className="chat-input"
                 />
                 <button type="submit" className="btn-primary" style={{ width: 46, height: 46, borderRadius: '50%', padding: 0 }}>
                     <Send size={17} />
