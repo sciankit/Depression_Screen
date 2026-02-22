@@ -12,3 +12,8 @@ Increase healthy behavior adherence through adaptive nudges.
 - 7-day retention
 - Nudge-to-action conversion
 - Risk-tier stabilization rate
+
+## Implemented in this branch
+- `src/growth/engagementEngine.js` for check-in tracking and streak calculation
+- Chat flow now records check-ins and surfaces adaptive nudges
+- Home dashboard displays streak and risk-aware behavioral guidance

@@ -1,16 +1,21 @@
-import { useState, useRef } from 'react';
-import { PlayCircle, Square, Loader, Moon, Sun, Heart } from 'lucide-react';
+import { useState, useRef, useMemo } from 'react';
+import { PlayCircle, Square, Loader, Moon, Heart, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useGlobalState } from '../GlobalStateProvider';
+import { calculateStreak, getNudgeForRiskTier, loadEngagementState } from '../growth/engagementEngine';
 
 const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICE_ID = import.meta.env.VITE_ELEVENLABS_VOICE_ID;
 
 export default function HomePage() {
     const navigate = useNavigate();
-    const { prediction, phqPrediction, isScoring } = useGlobalState();
+    const { prediction, phqPrediction, isScoring, ensembleDecision } = useGlobalState();
     const [status, setStatus] = useState("idle");
     const audioRef = useRef(null);
+    const engagement = useMemo(() => loadEngagementState(), []);
+    const streak = calculateStreak(engagement.checkInDays);
+    const riskTier = ensembleDecision?.tier ?? prediction?.risk_tier ?? 0;
+    const growthNudge = getNudgeForRiskTier(riskTier, streak);
 
     const playPrompt = async (e) => {
         e.stopPropagation(); // prevent card click
@@ -92,6 +97,21 @@ export default function HomePage() {
                 <h1 className="display" style={{ fontSize: '32px', margin: 0, lineHeight: 1.2 }}>
                     Ready to take a mind trace?
                 </h1>
+                <div style={{
+                    marginTop: '14px',
+                    background: 'white',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: '14px',
+                    padding: '12px',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                        <Target size={16} color="var(--color-primary)" />
+                        <strong style={{ fontSize: '14px' }}>GrowthFactor Streak: {streak} day{streak === 1 ? '' : 's'}</strong>
+                    </div>
+                    <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', lineHeight: 1.4 }}>
+                        {growthNudge}
+                    </div>
+                </div>
             </header>
 
             {/* Hero Card */}

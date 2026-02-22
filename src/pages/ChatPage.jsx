@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles } from 'lucide-react';
 import { useGlobalState } from '../GlobalStateProvider';
+import { calculateStreak, getNudgeForRiskTier, loadEngagementState, recordCheckIn } from '../growth/engagementEngine';
 
 export default function ChatPage() {
-    const { scoreModel } = useGlobalState();
+    const { scoreModel, ensembleDecision, prediction } = useGlobalState();
     const [messages, setMessages] = useState([
         { id: 1, text: "Hi there. I'm here if you want to reflect on your day or just take a breather. How are you feeling right now?", sender: 'bot' }
     ]);
+    const [engagementState, setEngagementState] = useState(() => loadEngagementState());
     const [input, setInput] = useState('');
     const messagesEndRef = useRef(null);
 
@@ -26,6 +28,7 @@ export default function ChatPage() {
         const updatedMessages = [...messages, newMsg];
         setMessages(updatedMessages);
         setInput('');
+        setEngagementState(recordCheckIn());
 
         // 1. Mock bot response (acting as the conversational agent)
         setTimeout(() => {
@@ -75,6 +78,19 @@ export default function ChatPage() {
 
             {/* Messages Area */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{
+                    border: '1px solid var(--color-border)',
+                    borderRadius: '12px',
+                    background: '#fff',
+                    padding: '10px 12px',
+                    fontSize: '13px',
+                    lineHeight: 1.4,
+                    color: 'var(--color-text-muted)'
+                }}>
+                    Streak: <strong style={{ color: 'var(--color-text-main)' }}>
+                        {calculateStreak(engagementState.checkInDays)} days
+                    </strong> · {getNudgeForRiskTier(ensembleDecision?.tier ?? prediction?.risk_tier ?? 0, calculateStreak(engagementState.checkInDays))}
+                </div>
                 {messages.map(msg => (
                     <div key={msg.id} style={{
                         alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
