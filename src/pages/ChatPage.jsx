@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Mic, Send, Square } from 'lucide-react';
+import { Mic, MicOff, Send, Square } from 'lucide-react';
 import { useGlobalState } from '../GlobalStateProvider';
 import { calculateStreak, loadEngagementState, recordCheckIn } from '../growth/engagementEngine';
 import { Conversation } from "@elevenlabs/client";
@@ -189,33 +189,37 @@ export default function ChatPage() {
             // We also need to manually trigger our own text if they're purely typing and testing Databricks.
             // But ElevenLabs will inherently process it and reply by triggering `onMessage` back down to us,
             // However, we want the Databricks test fired on user entry too:
-            const databricksResponse = await scoreModel([text]);
-            if (databricksResponse?.predictions?.length) {
-                const nlpPrediction = databricksResponse.predictions[0];
-                if (nlpPrediction.risk_tier > 0) {
-                    setMessages(prev => [...prev, {
-                        id: Date.now() + Math.random(),
-                        text: `Signal note: ${nlpPrediction.predicted_class} (${(nlpPrediction.confidence * 100).toFixed(1)}%)`,
-                        sender: 'system',
-                    }]);
+            try {
+                const databricksResponse = await scoreModel([text]);
+                if (databricksResponse?.predictions?.length) {
+                    const nlpPrediction = databricksResponse.predictions[0];
+                    if (nlpPrediction.risk_tier > 0) {
+                        setMessages(prev => [...prev, {
+                            id: Date.now() + Math.random(),
+                            text: `Signal note: ${nlpPrediction.predicted_class} (${(nlpPrediction.confidence * 100).toFixed(1)}%)`,
+                            sender: 'system',
+                        }]);
 
-                    if (nlpPrediction.risk_tier === 2) {
-                        const templateParams = {
-                            to_name: 'Swebert Correa',
-                            to_email: 'correaswebert@gmail.com',
-                            user_name: userName || 'Friend',
-                            flagged_message: text,
-                            tendency: nlpPrediction.predicted_class,
-                            confidence: (nlpPrediction.confidence * 100).toFixed(1)
-                        };
-                        emailjs.send(
-                            'service_aura_alerts',
-                            'template_tier2_alert',
-                            templateParams,
-                            'YOUR_PUBLIC_KEY'
-                        ).catch(console.error);
+                        if (nlpPrediction.risk_tier === 2) {
+                            const templateParams = {
+                                to_name: 'Swebert Correa',
+                                to_email: 'correaswebert@gmail.com',
+                                user_name: userName || 'Friend',
+                                flagged_message: text,
+                                tendency: nlpPrediction.predicted_class,
+                                confidence: (nlpPrediction.confidence * 100).toFixed(1)
+                            };
+                            emailjs.send(
+                                'service_aura_alerts',
+                                'template_tier2_alert',
+                                templateParams,
+                                'YOUR_PUBLIC_KEY'
+                            ).catch(console.error);
+                        }
                     }
                 }
+            } catch (dbErr) {
+                console.error("Databricks error:", dbErr);
             }
 
             conversationRef.current.sendUserMessage(text);
@@ -275,6 +279,27 @@ export default function ChatPage() {
                         placeholder="Drop your thoughts here..."
                         className="chat-input"
                     />
+
+                    {isConnected && (
+                        <button
+                            type="button"
+                            onClick={toggleMicrophone}
+                            className="chip"
+                            style={{
+                                height: 48,
+                                borderRadius: 999,
+                                padding: '0 16px',
+                                fontWeight: 600,
+                                background: isMicActive ? 'var(--color-danger-soft)' : 'var(--surface)',
+                                color: isMicActive ? 'var(--color-danger)' : 'inherit',
+                                cursor: 'pointer',
+                                marginRight: '8px'
+                            }}
+                        >
+                            {isMicActive ? <MicOff size={15} /> : <Mic size={15} />}
+                            {isMicActive ? 'Mute' : 'Unmute'}
+                        </button>
+                    )}
 
                     <button
                         type="button"
