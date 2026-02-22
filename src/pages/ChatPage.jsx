@@ -2,20 +2,20 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Mic, Send, Square } from 'lucide-react';
 import { useGlobalState } from '../GlobalStateProvider';
 import { calculateStreak, loadEngagementState, recordCheckIn } from '../growth/engagementEngine';
+import { Conversation } from "@elevenlabs/client";
 
 export default function ChatPage() {
-    const { scoreModel, interventionPlan, ensembleDecision, prediction } = useGlobalState();
+    const { scoreModel, interventionPlan, ensembleDecision, prediction, phqPrediction, userName } = useGlobalState();
     const [messages, setMessages] = useState([
-        { id: 1, text: 'Hey, I’m here. Want to name your mood in one sentence?', sender: 'bot' },
+        { id: 1, text: 'Hey, I’m here. Want to name your mood in one sentence? Start by connecting below.', sender: 'bot' },
     ]);
     const [engagementState, setEngagementState] = useState(() => loadEngagementState());
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
-    const [isListening, setIsListening] = useState(false);
-    const [liveTranscript, setLiveTranscript] = useState('');
+    const [isConnected, setIsConnected] = useState(false);
     const [speechError, setSpeechError] = useState('');
     const messagesEndRef = useRef(null);
-    const recognitionRef = useRef(null);
+    const conversationRef = useRef(null);
     const messagesRef = useRef(messages);
 
     const tier = interventionPlan?.tier ?? ensembleDecision?.tier ?? prediction?.risk_tier ?? 0;
@@ -24,144 +24,91 @@ export default function ChatPage() {
     useEffect(() => {
         messagesRef.current = messages;
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages, isTyping, liveTranscript]);
+    }, [messages, isTyping]);
 
-    const buildReply = useCallback((text) => {
-        const lowered = text.toLowerCase();
-        if (lowered.includes('stressed') || lowered.includes('tired')) {
-            return 'That sounds heavy. Try loosening your shoulders and taking three slow breaths with me.';
-        }
-        if (lowered.includes('good') || lowered.includes('great')) {
-            return 'Love that. Let’s lock in this momentum with one small win before tonight.';
-        }
-        if (tier >= 2) {
-            return 'Thanks for sharing honestly. I want you to open your Care page now so we can bring in support quickly.';
-        }
-        if (tier === 1) {
-            return 'I’m seeing elevated pressure patterns. A short walk and one trusted check-in can help shift this.';
-        }
-        return 'I’m with you. Let’s take this one breath at a time.';
-    }, [tier]);
 
-    const submitUserMessage = useCallback(async (rawText) => {
-        const text = rawText.trim();
-        if (!text) return;
 
-        const userMessage = { id: Date.now() + Math.random(), text, sender: 'user' };
-        const nextMessages = [...messagesRef.current, userMessage];
-        setMessages(nextMessages);
-        messagesRef.current = nextMessages;
-        setEngagementState(recordCheckIn());
-        setIsTyping(true);
-
-        setTimeout(() => {
-            const botMessage = { id: Date.now() + Math.random(), text: buildReply(text), sender: 'bot' };
-            setMessages((prev) => {
-                const merged = [...prev, botMessage];
-                messagesRef.current = merged;
-                return merged;
-            });
-            setIsTyping(false);
-        }, 980);
-
-        try {
-            const last20 = nextMessages.slice(-20).map((item) => item.text).join(' ');
-            const databricksResponse = await scoreModel([last20]);
-            if (databricksResponse?.predictions?.length) {
-                const nlpPrediction = databricksResponse.predictions[0];
-                if (nlpPrediction.risk_tier > 0) {
-                    const systemMessage = {
-                        id: Date.now() + Math.random(),
-                        text: `Signal note: ${nlpPrediction.predicted_class} (${(nlpPrediction.confidence * 100).toFixed(1)}%)`,
-                        sender: 'system',
-                    };
-                    setMessages((prev) => {
-                        const merged = [...prev, systemMessage];
-                        messagesRef.current = merged;
-                        return merged;
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('Failed to score model:', error);
-        }
-    }, [buildReply, scoreModel]);
-
-    const setupRecognition = useCallback(() => {
-        if (typeof window === 'undefined') return null;
-        const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!Recognition) return null;
-        if (recognitionRef.current) return recognitionRef.current;
-
-        const recognition = new Recognition();
-        recognition.lang = 'en-US';
-        recognition.continuous = true;
-        recognition.interimResults = true;
-
-        recognition.onresult = (event) => {
-            let interim = '';
-            const finals = [];
-
-            for (let i = event.resultIndex; i < event.results.length; i += 1) {
-                const transcript = event.results[i][0].transcript.trim();
-                if (!transcript) continue;
-                if (event.results[i].isFinal) {
-                    finals.push(transcript);
-                } else {
-                    interim += `${transcript} `;
-                }
-            }
-
-            setLiveTranscript(interim.trim());
-            finals.forEach((segment) => {
-                submitUserMessage(segment);
-                setLiveTranscript('');
-            });
-        };
-
-        recognition.onerror = () => {
-            setSpeechError('Voice input is unavailable right now.');
-            setIsListening(false);
-            setLiveTranscript('');
-        };
-
-        recognition.onend = () => {
-            setIsListening(false);
-            setLiveTranscript('');
-        };
-
-        recognitionRef.current = recognition;
-        return recognition;
-    }, [submitUserMessage]);
-
-    const toggleListening = useCallback(() => {
-        const recognition = setupRecognition();
-        if (!recognition) {
-            setSpeechError('Voice input is not supported in this browser.');
-            return;
-        }
-
-        if (isListening) {
-            recognition.stop();
+    const toggleConnection = async () => {
+        if (isConnected) {
+            await conversationRef.current?.endSession();
+            conversationRef.current = null;
+            setIsConnected(false);
             return;
         }
 
         try {
             setSpeechError('');
-            setLiveTranscript('');
-            recognition.start();
-            setIsListening(true);
+            await navigator.mediaDevices.getUserMedia({ audio: true });
+
+            const phqScoreRaw = phqPrediction?.score ?? phqPrediction?.prediction ?? phqPrediction ?? 0;
+            const phqScore = typeof phqScoreRaw === 'string' ? parseFloat(phqScoreRaw) : (typeof phqScoreRaw === 'number' ? phqScoreRaw : 0);
+
+            // Map tier to agent IDs directly
+            const agentIds = {
+                0: import.meta.env.VITE_ELEVENLABS_COMPANION_AGENT_ID,
+                1: import.meta.env.VITE_ELEVENLABS_COACH_AGENT_ID,
+                2: import.meta.env.VITE_ELEVENLABS_RESPONDER_AGENT_ID
+            };
+
+            const conversation = await Conversation.startSession({
+                agentId: agentIds[tier] || import.meta.env.VITE_ELEVENLABS_COMPANION_AGENT_ID,
+                dynamicVariables: {
+                    user_name: userName || "Friend",
+                    nlp_class: prediction?.predicted_class || "Neutral",
+                    phq_score: phqScore.toString()
+                },
+                onModeChange: (mode) => {
+                    setIsTyping(mode.mode === 'speaking');
+                },
+                onMessage: async (message) => {
+                    if (message.message) {
+                        setMessages(prev => [...prev, {
+                            id: Date.now() + Math.random(),
+                            text: message.message,
+                            sender: message.source === 'user' ? 'user' : 'bot'
+                        }]);
+
+                        if (message.source === 'user') {
+                            try {
+                                const databricksResponse = await scoreModel([message.message]);
+                                if (databricksResponse?.predictions?.length) {
+                                    const nlpPrediction = databricksResponse.predictions[0];
+                                    if (nlpPrediction.risk_tier > 0) {
+                                        setMessages(prev => [...prev, {
+                                            id: Date.now() + Math.random(),
+                                            text: `Signal note: ${nlpPrediction.predicted_class} (${(nlpPrediction.confidence * 100).toFixed(1)}%)`,
+                                            sender: 'system',
+                                        }]);
+                                    }
+                                }
+                            } catch (e) {
+                                console.error(e);
+                            }
+                        }
+                    }
+                },
+                onError: (error) => {
+                    console.error("Error:", error);
+                    setSpeechError(typeof error === 'string' ? error : error.message || 'Connection error.');
+                    setIsConnected(false);
+                },
+            });
+
+            conversationRef.current = conversation;
+            setIsConnected(true);
+            setEngagementState(recordCheckIn());
+
         } catch (error) {
-            console.error('Unable to start speech recognition:', error);
-            setSpeechError('Voice input is unavailable right now.');
-            setIsListening(false);
+            console.error("Failed to start Aura:", error);
+            setSpeechError("Microphone access is required to connect, or there was a network error.");
+            setIsConnected(false);
         }
-    }, [isListening, setupRecognition]);
+    };
 
     useEffect(() => () => {
-        if (recognitionRef.current) {
-            recognitionRef.current.stop();
-            recognitionRef.current = null;
+        if (conversationRef.current) {
+            conversationRef.current.endSession();
+            conversationRef.current = null;
         }
     }, []);
 
@@ -169,8 +116,21 @@ export default function ChatPage() {
         e.preventDefault();
         const text = input.trim();
         if (!text) return;
+
+        if (!isConnected || !conversationRef.current) {
+            setSpeechError("Please click 'Connect' before typing so the AI can engage.");
+            return;
+        }
+
         setInput('');
-        await submitUserMessage(text);
+        try {
+            // Append instantly to UI so user sees it, then send to ElevenLabs
+            setMessages(prev => [...prev, { id: Date.now() + Math.random(), text, sender: 'user' }]);
+            conversationRef.current.sendUserMessage(text);
+            setEngagementState(recordCheckIn());
+        } catch (err) {
+            setSpeechError("Failed to send text.");
+        }
     };
 
     return (
@@ -198,15 +158,9 @@ export default function ChatPage() {
                         );
                     })}
 
-                    {liveTranscript && (
-                        <div style={{ alignSelf: 'flex-end', maxWidth: '82%' }}>
-                            <div className="chat-bubble chat-bubble-user">{liveTranscript}</div>
-                        </div>
-                    )}
-
                     {isTyping && (
                         <div style={{ alignSelf: 'flex-start' }}>
-                            <div className="chip">typing...</div>
+                            <div className="chip">agent is speaking...</div>
                         </div>
                     )}
                     <div ref={messagesEndRef} />
@@ -224,12 +178,12 @@ export default function ChatPage() {
 
                 <button
                     type="button"
-                    onClick={toggleListening}
+                    onClick={toggleConnection}
                     className="chip"
-                    style={{ height: 46, borderRadius: 999, padding: '0 14px', fontWeight: 700 }}
+                    style={{ height: 46, borderRadius: 999, padding: '0 14px', fontWeight: 700, background: isConnected ? '#FF2D2D22' : 'transparent', color: isConnected ? '#FF2D2D' : 'inherit' }}
                 >
-                    {isListening ? <Square size={12} fill="currentColor" /> : <Mic size={15} />}
-                    {isListening ? 'Stop' : 'Speak'}
+                    {isConnected ? <Square size={12} fill="currentColor" /> : <Mic size={15} />}
+                    {isConnected ? 'Disconnect' : 'Connect'}
                 </button>
 
                 <button type="submit" className="btn-primary" style={{ width: 46, height: 46, borderRadius: '50%', padding: 0 }}>

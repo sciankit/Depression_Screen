@@ -12,6 +12,7 @@
     "submission:generate": "node scripts/generate-submission-kit.mjs"
   },
   "dependencies": {
+    "@elevenlabs/client": "^0.14.0",
     "lucide-react": "^0.575.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
