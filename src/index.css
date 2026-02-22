@@ -249,55 +249,111 @@ a {
 }
 
 .home-simplified-wrap {
-  max-width: 700px;
+  max-width: 860px;
 }
 
-.home-minimal-hero {
+.home-chat-card {
   position: relative;
   overflow: hidden;
+  min-height: 260px;
   margin-bottom: 12px;
-  background: linear-gradient(145deg, rgba(255, 95, 46, 0.14), rgba(255, 208, 95, 0.13), rgba(10, 143, 123, 0.16));
+  background: linear-gradient(135deg, #f3912f 0%, #f49a37 58%, #f29c3f 100%);
+  color: #fff8f2;
 }
 
-[data-theme='dark'] .home-minimal-hero {
-  background: linear-gradient(145deg, rgba(255, 140, 73, 0.18), rgba(255, 215, 122, 0.12), rgba(62, 199, 177, 0.16));
+[data-theme='dark'] .home-chat-card {
+  background: linear-gradient(135deg, #ef8d35 0%, #eb9b42 54%, #e9892f 100%);
+  color: #fff9f4;
 }
 
-.home-orb {
+.home-chat-glow {
   position: absolute;
   border-radius: 50%;
-  filter: blur(0.2px);
-  animation: floatSoft 8s ease-in-out infinite;
+  pointer-events: none;
+  right: -74px;
+  bottom: -66px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(255, 219, 170, 0.32), rgba(255, 219, 170, 0));
+  animation: floatSoft 9s ease-in-out infinite;
 }
 
-.home-orb-a {
-  width: 160px;
-  height: 160px;
-  right: -55px;
-  top: -54px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+.home-chat-glow.second {
+  right: auto;
+  left: -58px;
+  top: -72px;
+  width: 180px;
+  height: 180px;
+  animation-duration: 12s;
 }
 
-.home-orb-b {
-  width: 120px;
-  height: 120px;
-  left: -26px;
-  bottom: -52px;
-  background: radial-gradient(circle, rgba(10, 143, 123, 0.24), rgba(10, 143, 123, 0));
-  animation-duration: 11s;
+.home-chat-chip {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #fff8f2;
 }
 
-.home-minimal-title {
-  font-size: 36px;
-  line-height: 1.04;
-  margin-bottom: 12px;
+.home-chat-title {
+  font-size: 46px;
+  line-height: 0.96;
+  margin-bottom: 10px;
+  color: #fff8f2;
+}
+
+.home-chat-subtitle {
+  margin: 0 0 16px;
+  max-width: 540px;
+  font-size: 25px;
+  line-height: 1.32;
+  color: rgba(255, 248, 242, 0.92);
+}
+
+.home-chat-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.home-pill-btn {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.24);
+  color: #fff9f4;
+  border-radius: 999px;
+  padding: 11px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: transform 0.16s ease, background 0.16s ease;
+}
+
+.home-pill-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.home-pill-btn-solid {
+  background: #fff9f4;
+  color: #e07a1b;
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.home-pill-btn-solid:hover {
+  background: #fff;
+}
+
+[data-theme='dark'] .home-pill-btn-solid {
+  color: #c76512;
 }
 
 .home-action-rail {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .home-action-pill {
@@ -344,6 +400,12 @@ a {
   100% {
     transform: translateY(0);
   }
+}
+
+.home-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .home-signal-grid {
@@ -423,6 +485,25 @@ a {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.home-stats-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.home-stat-pill {
+  border: 1px solid var(--color-border);
+  background: var(--surface);
+  color: var(--color-ink);
+  border-radius: 999px;
+  padding: 8px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .home-plan-item {
@@ -821,8 +902,13 @@ a {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .home-minimal-title {
-    font-size: 31px;
+  .home-chat-title {
+    font-size: 37px;
+  }
+
+  .home-chat-subtitle {
+    font-size: 19px;
+    max-width: 100%;
   }
 
   .home-action-rail {
@@ -836,5 +922,9 @@ a {
   .home-signal-card {
     grid-template-columns: 1fr;
     justify-items: center;
+  }
+
+  .home-stats-row {
+    grid-template-columns: 1fr;
   }
 }

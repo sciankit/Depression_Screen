@@ -4,7 +4,9 @@ import {
     Flame,
     HeartPulse,
     Loader,
+    MessageCircle,
     Orbit,
+    PhoneCall,
     PlayCircle,
     ShieldAlert,
     Sparkles,
@@ -30,17 +32,12 @@ function clamp(value, min = 0, max = 100) {
 }
 
 function buildSignalModel(riskTier, streak) {
-    const sleep = clamp(82 - riskTier * 19 + streak * 2);
-    const stress = clamp(28 + riskTier * 26 - streak * 2);
-    const social = clamp(68 - riskTier * 13 + streak * 3);
+    const sleep = clamp(80 - riskTier * 20 + streak * 2);
+    const stress = clamp(30 + riskTier * 25 - streak * 2);
+    const social = clamp(65 - riskTier * 12 + streak * 3);
     const readiness = clamp(Math.round((sleep + (100 - stress) + social) / 3));
 
-    return {
-        sleep,
-        stress,
-        social,
-        readiness,
-    };
+    return { sleep, stress, social, readiness };
 }
 
 export default function HomePage() {
@@ -54,6 +51,7 @@ export default function HomePage() {
     const riskTier = interventionPlan?.tier ?? ensembleDecision?.tier ?? prediction?.risk_tier ?? 0;
     const riskMeta = RISK_TIERS[riskTier] || RISK_TIERS[0];
     const nudge = getNudgeForRiskTier(riskTier, streak);
+    const signals = useMemo(() => buildSignalModel(riskTier, streak), [riskTier, streak]);
 
     const momentum = useMemo(() => {
         if (riskTier >= 2) return 'Stabilize';
@@ -61,16 +59,14 @@ export default function HomePage() {
         return 'Maintain';
     }, [riskTier]);
 
-    const signals = useMemo(() => buildSignalModel(riskTier, streak), [riskTier, streak]);
-
     const todayPlan = useMemo(() => {
         if (interventionPlan?.interventions?.length) {
             return interventionPlan.interventions.slice(0, 3);
         }
         return [
-            'Quick 2-minute mood check-in',
-            'Run adaptive plan refresh',
-            'Review care settings in one tap',
+            '2-minute check-in',
+            'Adaptive plan refresh',
+            'Open care settings once',
         ];
     }, [interventionPlan]);
 
@@ -128,10 +124,10 @@ export default function HomePage() {
         setStatus('idle');
     };
 
-    const btnLabel = isScoring
+    const listenLabel = isScoring
         ? 'Analyzing...'
         : status === 'idle'
-            ? 'Play voice note'
+            ? 'Listen First'
             : status === 'loading'
                 ? 'Generating...'
                 : status === 'playing'
@@ -140,36 +136,37 @@ export default function HomePage() {
 
     return (
         <div className="screen-wrap home-simplified-wrap animate-fade-in">
-            <section className="card home-minimal-hero reveal-1">
-                <div className="home-orb home-orb-a" />
-                <div className="home-orb home-orb-b" />
-
+            <section className="card home-chat-card reveal-1">
+                <div className="home-chat-glow" />
+                <div className="home-chat-glow second" />
                 <div style={{ position: 'relative', zIndex: 2 }}>
-                    <div className="chip" style={{ marginBottom: '10px' }}>
+                    <div className="chip home-chat-chip">
                         <span style={{ width: 8, height: 8, borderRadius: 99, background: riskMeta.color }} />
-                        {riskMeta.label} support mode
+                        {riskMeta.label} support
                     </div>
 
-                    <h1 className="display home-minimal-title">Fresh start. Useful next step.</h1>
+                    <h1 className="display home-chat-title">Daily Check-in</h1>
+                    <p className="home-chat-subtitle">Take 2 minutes to talk with your mindful companion about your day.</p>
 
-                    <div className="home-chip-row" style={{ marginBottom: '12px' }}>
-                        <div className="chip"><Orbit size={13} /> {streak}d streak</div>
-                        <div className="chip"><Flame size={13} /> {momentum}</div>
-                        <div className="chip"><HeartPulse size={13} /> {nudge}</div>
+                    <div className="home-chat-actions">
+                        <button className="home-pill-btn" onClick={() => navigate('/chat')}>
+                            <MessageCircle size={14} /> Text Chat
+                        </button>
+                        <button className="home-pill-btn" onClick={() => navigate('/chat')}>
+                            <PhoneCall size={14} /> Voice Call
+                        </button>
+                        <button
+                            className="home-pill-btn home-pill-btn-solid"
+                            onClick={status === 'playing' ? stopPrompt : playPrompt}
+                            disabled={isScoring}
+                        >
+                            {isScoring && <Loader size={14} className="animate-spin" />}
+                            {!isScoring && status === 'idle' && <PlayCircle size={14} />}
+                            {!isScoring && status === 'loading' && <Loader size={14} className="animate-spin" />}
+                            {!isScoring && status === 'playing' && <Square size={12} fill="currentColor" />}
+                            {listenLabel}
+                        </button>
                     </div>
-
-                    <button
-                        className="btn-primary"
-                        onClick={status === 'playing' ? stopPrompt : playPrompt}
-                        disabled={isScoring}
-                        style={{ opacity: isScoring ? 0.75 : 1 }}
-                    >
-                        {isScoring && <Loader size={14} className="animate-spin" />}
-                        {!isScoring && status === 'idle' && <PlayCircle size={14} />}
-                        {!isScoring && status === 'loading' && <Loader size={14} className="animate-spin" />}
-                        {!isScoring && status === 'playing' && <Square size={13} fill="currentColor" />}
-                        {btnLabel}
-                    </button>
                 </div>
             </section>
 
@@ -198,8 +195,16 @@ export default function HomePage() {
                 </div>
 
                 <div className="card home-plan-card">
-                    <div className="home-mini-label" style={{ marginBottom: 8 }}>Today Plan</div>
-                    <div style={{ display: 'grid', gap: 8, marginBottom: 10 }}>
+                    <div className="home-mini-label" style={{ marginBottom: 8 }}>Today Stats</div>
+                    <div className="home-stats-row">
+                        <div className="home-stat-pill"><Orbit size={13} /> {streak}d streak</div>
+                        <div className="home-stat-pill"><Flame size={13} /> {momentum}</div>
+                    </div>
+                    <div className="home-stats-row" style={{ marginBottom: 10 }}>
+                        <div className="home-stat-pill"><ShieldAlert size={13} /> {riskMeta.label}</div>
+                        <div className="home-stat-pill"><HeartPulse size={13} /> {nudge}</div>
+                    </div>
+                    <div style={{ display: 'grid', gap: 8 }}>
                         {todayPlan.map((item, idx) => (
                             <div key={item} className="home-plan-item">
                                 <span>{idx + 1}</span>
@@ -207,9 +212,6 @@ export default function HomePage() {
                             </div>
                         ))}
                     </div>
-                    <button className="chip" onClick={() => navigate('/plan')}>
-                        <Activity size={12} /> Refine plan
-                    </button>
                 </div>
             </section>
 
@@ -225,6 +227,9 @@ export default function HomePage() {
                         {item.label}
                     </button>
                 ))}
+                <button className="home-action-pill" onClick={() => navigate('/plan')}>
+                    <Activity size={12} /> Action Plan
+                </button>
             </section>
         </div>
     );

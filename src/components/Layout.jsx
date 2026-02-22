@@ -3,7 +3,10 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { Home, MessageCircle, ShieldCheck, Sparkles, ClipboardList, Moon, Sun } from 'lucide-react';
 
 export default function Layout() {
-    const [theme, setTheme] = useState(() => localStorage.getItem('mindtrace-theme') || 'light');
+    const [theme, setTheme] = useState(() => {
+        const stored = localStorage.getItem('mindtrace-theme');
+        return stored === 'dark' ? 'dark' : 'light';
+    });
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
